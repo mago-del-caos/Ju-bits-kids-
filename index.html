@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ju-bits Kids — Tutores para primaria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Fredoka:wght@500;600&family=Lora:ital@0;1&family=EB+Garamond&family=Comfortaa:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --acc:#12B5A5; --font-chat:'Baloo 2',sans-serif;
+    --bg:#FFF7EA; --card:#FFFFFF; --borde:#F0DFC2; --texto:#3D3428; --suave:#8A7B63;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Baloo 2',system-ui,sans-serif; background:var(--bg); color:var(--texto); min-height:100vh;}
+  .hidden{display:none !important;}
+  .wrap{max-width:760px; margin:0 auto; padding:14px 14px 30px;}
+  .banner{width:100%; border-radius:20px; display:block; box-shadow:0 4px 18px rgba(120,90,20,.15);}
+  h1{font-size:1.9rem; font-weight:800; text-align:center; margin:14px 0 2px;}
+  .sub{text-align:center; color:var(--suave); font-size:1.05rem; margin-bottom:14px;}
+  .card{background:var(--card); border:2px solid var(--borde); border-radius:20px; padding:20px; margin:14px 0; box-shadow:0 3px 12px rgba(120,90,20,.07);}
+  .card h2{font-size:1.25rem; margin-bottom:10px;}
+  .card p, .card li{font-size:1.02rem; line-height:1.5;}
+  .card ol, .card ul{margin:8px 0 8px 22px;}
+  .card li{margin:5px 0;}
+  .btn{display:block; width:100%; padding:16px; border:none; border-radius:16px; background:var(--acc); color:#fff;
+       font-family:'Baloo 2',sans-serif; font-size:1.15rem; font-weight:700; cursor:pointer; margin-top:14px;}
+  .btn:disabled{opacity:.55;}
+  .btn.alt{background:#fff; color:var(--texto); border:2px solid var(--borde);}
+  .btn.small{width:auto; display:inline-block; padding:10px 18px; font-size:1rem; margin-top:0;}
+  label{display:block; font-weight:700; margin:14px 0 6px; font-size:1.02rem;}
+  input[type=text], textarea, select{width:100%; padding:14px; border:2px solid var(--borde); border-radius:14px;
+       font-family:'Baloo 2',sans-serif; font-size:1.05rem; background:#FFFDF7; color:var(--texto);}
+  textarea{resize:vertical; min-height:64px;}
+  .err{color:#C1272D; font-weight:700; min-height:1.3em; margin-top:8px;}
+  .hint{color:var(--suave); font-size:.95rem; margin-top:6px; line-height:1.45;}
+  .prov-row{display:flex; gap:10px; margin-top:6px;}
+  .prov{flex:1; padding:14px; border:3px solid var(--borde); border-radius:16px; text-align:center; cursor:pointer; font-weight:700; font-size:1.05rem; background:#FFFDF7;}
+  .prov.sel{border-color:var(--acc); background:#EAFaf7;}
+  .shield{background:#EFF9F0; border:2px solid #BFE6C4; border-radius:16px; padding:14px 16px; margin-top:12px;}
+  .shield p, .shield li{font-size:.98rem;}
+  /* Selector de personajes */
+  #pers-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; margin-top:6px;}
+  .pers{background:var(--card); border:3px solid var(--borde); border-radius:20px; padding:12px 10px 14px; text-align:center; cursor:pointer; position:relative; overflow:hidden; transition:transform .12s;}
+  .pers:active{transform:scale(.97);}
+  .pers img{width:100%; aspect-ratio:1; object-fit:cover; border-radius:14px;}
+  .pers .name{font-size:1.3rem; font-weight:800; margin-top:8px;}
+  .pers .intel{font-size:.82rem; font-weight:700; color:#fff; border-radius:999px; padding:3px 10px; display:inline-block; margin-top:3px;}
+  .pers .trait{color:var(--suave); font-size:.92rem; margin-top:5px; line-height:1.3;}
+  .topbar{display:flex; gap:10px; justify-content:space-between; align-items:center; margin:12px 0 2px; flex-wrap:wrap;}
+  /* Chat */
+  #chat-head{display:flex; align-items:center; gap:12px; background:var(--card); border:2px solid var(--borde); border-radius:18px; padding:10px 14px;}
+  #chat-head img{width:58px; height:58px; border-radius:50%; object-fit:cover; border:3px solid var(--acc);}
+  #chat-name{font-size:1.3rem; font-weight:800; line-height:1.1;}
+  #chat-trait{color:var(--suave); font-size:.95rem;}
+  #msgs{display:flex; flex-direction:column; gap:10px; padding:16px 4px; min-height:300px; max-height:56vh; overflow-y:auto;}
+  .msg{max-width:85%; padding:12px 16px; border-radius:18px; font-family:var(--font-chat); font-size:1.12rem; line-height:1.45; white-space:pre-wrap; word-wrap:break-word;}
+  .msg.user{align-self:flex-end; background:var(--acc); color:#fff; border-bottom-right-radius:6px;}
+  .msg.bot{align-self:flex-start; background:#fff; border:2px solid var(--borde); border-bottom-left-radius:6px;}
+  .msg.sys{align-self:center; background:#FDECEC; color:#8E2323; font-size:.95rem; font-family:'Baloo 2',sans-serif;}
+  .msg .speak{display:inline-block; margin-top:6px; background:#FFF3D6; border:2px solid var(--borde); border-radius:999px;
+       padding:3px 12px; font-size:.9rem; cursor:pointer; font-family:'Baloo 2',sans-serif; font-weight:700; color:var(--texto);}
+  #typing{color:var(--suave); min-height:1.4em; padding:0 6px; font-size:.98rem;}
+  #composer{display:flex; gap:8px; align-items:center; background:var(--card); border:2px solid var(--borde); border-radius:18px; padding:8px;}
+  #composer input{flex:1; border:none; background:transparent; font-size:1.1rem; padding:10px; font-family:'Baloo 2',sans-serif;}
+  #composer input:focus{outline:none;}
+  .iconbtn{border:none; border-radius:14px; width:52px; height:52px; font-size:1.45rem; cursor:pointer; flex:none;}
+  #btn-mic{background:#FFF3D6;}
+  #btn-mic.rec{background:#F8C9C9; animation:pulse 1s infinite;}
+  @keyframes pulse{50%{opacity:.55;}}
+  #btn-send{background:var(--acc); color:#fff;}
+  .chat-tools{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+  .toolbtn{flex:1; padding:11px; border-radius:14px; border:2px solid var(--borde); background:#fff; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:.98rem; cursor:pointer; min-width:130px;}
+  .toolbtn.on{border-color:var(--acc); background:#EAFaf7;}
+  /* Modal puerta de padres */
+  #gate{position:fixed; inset:0; background:rgba(61,52,40,.55); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px;}
+  #gate .box{background:#fff; border-radius:22px; padding:24px; max-width:360px; width:100%; text-align:center;}
+  #gate .q{font-size:1.7rem; font-weight:800; margin:10px 0;}
+  #gate input{text-align:center; font-size:1.3rem;}
+  .foot{text-align:center; color:var(--suave); font-size:.9rem; margin-top:18px; line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <img class="banner" src="banner.jpg" alt="Los Ju-bits Kids">
+  <h1>Ju-bits Kids</h1>
+  <p class="sub">Tutores con inteligencia artificial para niños de primaria, basados en las inteligencias múltiples.</p>
+
+  <!-- ============ BIENVENIDA PARA PADRES ============ -->
+  <section id="screen-welcome">
+    <div class="card">
+      <h2>👋 Para mamá, papá o tutor: empieza aquí</h2>
+      <p><strong>Ju-bits Kids</strong> es un grupo de nueve tutores de fieltro con los que tu hijo o hija puede platicar, preguntar y estudiar. Cada uno fortalece una inteligencia distinta, según la teoría de las <strong>inteligencias múltiples</strong> de Howard Gardner: las palabras, los números, el arte, la música, el cuerpo, la amistad, las emociones, la naturaleza… y <strong>Coni</strong>, que piensa en red y conecta todas las demás.</p>
+      <p style="margin-top:10px;">Esta pantalla es para ti, adulto. La configuración la haces tú una sola vez; después, tu hijo elige tutor y a aprender.</p>
+    </div>
+    <div class="card">
+      <h2>🔑 Cómo funciona (configuración única)</h2>
+      <ol>
+        <li>Los tutores usan inteligencia artificial de <strong>Groq</strong> o de <strong>Gemini</strong> (Google). Necesitas una <strong>clave gratuita</strong> de uno de los dos servicios: es una cuenta tuya, sin costo, que se consigue en dos minutos.</li>
+        <li>En la siguiente pantalla eliges el servicio y pegas tu clave. La app la prueba al momento y la guarda <strong>solo en este dispositivo</strong>: no se envía a ningún servidor nuestro ni se comparte.</li>
+        <li>Después creas el perfil de tu hijo: su nombre o apodo, su edad, su grado y qué le gusta. Con eso los tutores adaptan su lenguaje y sus ejemplos.</li>
+        <li>¡Listo! Tu hijo elige un tutor y empieza a platicar, por texto o con la voz.</li>
+      </ol>
+      <div class="shield">
+        <h2 style="font-size:1.1rem;">🛡️ Seguridad para menores</h2>
+        <ul>
+          <li><strong>Filtros en tres capas:</strong> los tutores tienen reglas estrictas de contenido infantil; la app revisa lo que escribe tu hijo antes de enviarlo y revisa lo que responde la IA antes de mostrarlo. Los temas de adultos quedan bloqueados.</li>
+          <li><strong>Sin datos personales:</strong> los tutores nunca piden nombre completo, dirección, escuela, teléfono ni fotos, y la app detecta si tu hijo intenta compartir un número de teléfono.</li>
+          <li><strong>Si algo preocupa:</strong> si tu hijo cuenta que alguien le hace daño o que algo le preocupa, el tutor le dirá con cariño que lo platique con un adulto de confianza.</li>
+          <li><strong>Zona de padres con candado:</strong> cambiar la clave o el perfil pide resolver una operación sencilla, para que un niño no lo cambie por accidente.</li>
+          <li>Ningún filtro es perfecto: <strong>acompaña a tu hijo en sus primeras sesiones</strong> y platiquen sobre lo que aprende.</li>
+        </ul>
+      </div>
+      <button class="btn" id="btn-start">Soy mamá, papá o tutor: comenzar la configuración</button>
+    </div>
+  </section>
+
+  <!-- ============ CLAVE (LA PONE EL ADULTO) ============ -->
+  <section id="screen-key" class="hidden">
+    <div class="card">
+      <h2>🔑 Paso 1 · Tu clave de inteligencia artificial</h2>
+      <p>Elige el servicio y pega tu clave gratuita. Solo se guarda en este dispositivo.</p>
+      <label>1 · Elige el servicio</label>
+      <div class="prov-row">
+        <div class="prov" id="prov-groq">⚡ Groq</div>
+        <div class="prov" id="prov-gemini">✨ Gemini</div>
+      </div>
+      <label id="key-label">2 · Tu clave</label>
+      <input type="text" id="key" autocomplete="off" spellcheck="false" placeholder="Pega aquí tu clave">
+      <p class="hint" id="key-hint"></p>
+      <p class="err" id="key-err"></p>
+      <button class="btn" id="btn-key">Probar clave y continuar</button>
+      <button class="btn alt" id="btn-key-back">Volver</button>
+    </div>
+  </section>
+
+  <!-- ============ PERFIL DEL NIÑO (LO CREA EL ADULTO) ============ -->
+  <section id="screen-profile" class="hidden">
+    <div class="card">
+      <h2>🧒 Paso 2 · El perfil de tu hijo o hija</h2>
+      <p>Con estos datos los tutores adaptan su lenguaje y sus ejemplos. Se guardan solo en este dispositivo.</p>
+      <label>¿Cómo le llaman en casa? (nombre o apodo)</label>
+      <input type="text" id="prof-name" maxlength="30" placeholder="Por ejemplo: Sofi, Max, mi campeón">
+      <label>Edad</label>
+      <select id="prof-age">
+        <option value="">Elige la edad…</option>
+        <option>5</option><option>6</option><option>7</option><option>8</option>
+        <option>9</option><option>10</option><option>11</option><option>12</option>
+      </select>
+      <label>Grado de primaria</label>
+      <select id="prof-grade">
+        <option value="">Elige el grado…</option>
+        <option>1º</option><option>2º</option><option>3º</option>
+        <option>4º</option><option>5º</option><option>6º</option>
+      </select>
+      <label>¿Qué le gusta? (juegos, temas, personajes, deportes…)</label>
+      <textarea id="prof-interests" maxlength="200" placeholder="Por ejemplo: los dinosaurios, el futbol, dibujar, los cuentos de miedo suaves"></textarea>
+      <p class="err" id="prof-err"></p>
+      <button class="btn" id="btn-profile">Guardar perfil y conocer a los tutores</button>
+    </div>
+  </section>
+
+  <!-- ============ SELECTOR DE TUTORES ============ -->
+  <section id="screen-pick" class="hidden">
+    <div class="topbar">
+      <strong style="font-size:1.15rem;">Elige a tu tutor de hoy 👇</strong>
+      <button class="btn alt small" id="btn-parents-1">🔒 Zona de padres</button>
+    </div>
+    <div id="pers-grid"></div>
+    <p class="foot">Cada tutor fortalece una inteligencia. ¡Puedes cambiar de tutor cuando quieras y probar con todos!</p>
+  </section>
+
+  <!-- ============ CHAT ============ -->
+  <section id="screen-chat" class="hidden">
+    <div id="chat-head">
+      <img id="chat-avatar" src="" alt="">
+      <div>
+        <div id="chat-name"></div>
+        <div id="chat-trait"></div>
+      </div>
+    </div>
+    <div id="msgs"></div>
+    <div id="typing"></div>
+    <div id="composer">
+      <button class="iconbtn" id="btn-mic" title="Hablar">🎤</button>
+      <input type="text" id="input" placeholder="Escribe tu mensaje…" autocomplete="off">
+      <button class="iconbtn" id="btn-send" title="Enviar">➤</button>
+    </div>
+    <div class="chat-tools">
+      <button class="toolbtn" id="btn-autoread">🔊 Leer en voz alta: sí</button>
+      <button class="toolbtn" id="btn-change-pers">🔀 Cambiar de tutor</button>
+      <button class="toolbtn" id="btn-parents-2">🔒 Zona de padres</button>
+    </div>
+  </section>
+
+  <!-- ============ ZONA DE PADRES ============ -->
+  <section id="screen-parents" class="hidden">
+    <div class="card">
+      <h2>🔒 Zona de padres</h2>
+      <p>Desde aquí controlas la app de tu hijo.</p>
+      <button class="btn alt" id="btn-change-key">🔑 Cambiar la clave de IA</button>
+      <button class="btn alt" id="btn-profile-edit">🧒 Editar el perfil de tu hijo</button>
+      <button class="btn alt" id="btn-autoread-2">🔊 Lectura en voz alta automática</button>
+      <button class="btn alt" id="btn-wipe" style="border-color:#E5B4B4; color:#8E2323;">🗑️ Borrar todo (clave y perfil)</button>
+      <button class="btn" id="btn-parents-back">Volver con los tutores</button>
+      <div class="shield">
+        <p><strong>Recuerda:</strong> los filtros protegen, pero tu acompañamiento es la mejor protección. Revisa de vez en cuando con tu hijo lo que platica con los tutores y celebren juntos lo que aprende. 💛</p>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot">Ju-bits Kids · Tutores para primaria con inteligencias múltiples<br>«Hacer siempre y en todo lo mejor»</p>
+</div>
+
+<!-- ============ PUERTA DE PADRES ============ -->
+<div id="gate" class="hidden">
+  <div class="box">
+    <div style="font-size:2rem;">🔒</div>
+    <p><strong>Solo adultos.</strong><br>Resuelve esta operación para continuar:</p>
+    <div class="q" id="gate-q">6 × 7 = ¿?</div>
+    <input type="text" id="gate-a" inputmode="numeric" placeholder="Tu respuesta">
+    <p class="err" id="gate-err"></p>
+    <button class="btn" id="gate-ok">Entrar</button>
+    <button class="btn alt" id="gate-cancel">Cancelar</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ================= PROVEEDORES ================= */
+var PROVIDERS = {
+  groq: {
+    label: "Tu clave de Groq (empieza con gsk_)",
+    placeholder: "gsk_...",
+    hint: '¿No tienes clave? Consíguela gratis en <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>: crea tu cuenta de adulto, pulsa «Create API Key» y cópiala.'
+  },
+  gemini: {
+    label: "Tu clave de Gemini (empieza con AIza o con AQ.)",
+    placeholder: "AIza... o AQ....",
+    hint: '¿No tienes clave? Consíguela gratis en <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>: entra con tu cuenta de Google, pulsa «Create API key» y cópiala.'
+  }
+};
+
+/* ================= REGLAS BASE PARA TODOS LOS TUTORES ================= */
+var BASE = "Eres un tutor de Ju-bits Kids, un compañero de aprendizaje para niños de PRIMARIA (entre 5 y 12 años) del Instituto Juventud del Estado de México. " +
+  "Hablas siempre en español, con palabras sencillas, frases cortas y mucho cariño. Respondes en 2 a 4 frases por turno, una sola idea a la vez, como en una plática, no como en una clase. " +
+  "Tu misión es que el niño PIENSE y descubra: guía con preguntas y pistas; si te pide hacerle la tarea completa, resuélvela CON él, paso a paso, dejando que él intente cada paso. Celebra sus esfuerzos y sus ideas. " +
+  "Actúas desde la Filosofía Josefina, cuyo lema es «Hacer siempre y en todo lo mejor»: cercanía, paciencia y alegría de aprender y de hacer bien hasta las cosas pequeñas. " +
+  "REGLAS DE SEGURIDAD QUE NUNCA SE ROMPEN: " +
+  "1) Nunca pidas datos personales: ni nombre completo, dirección, escuela, teléfono, contraseñas ni fotos; si el niño te los cuenta, no los repitas y recuérdale con cariño que esos datos solo se comparten con su familia. " +
+  "2) Nada de temas de adultos: nada de contenido sexual o romántico, nada de violencia con detalles, nada de drogas, alcohol, apuestas ni terror. Si el niño pregunta por un tema así, dile con amabilidad que eso es un tema de grandes para platicar con sus papás y ofrécele un tema divertido. " +
+  "3) Si el niño cuenta que alguien le hace daño, le pega, le hace bullying o le pide guardar secretos que le incomodan, escúchalo con cariño, dile que no es su culpa y que lo cuente hoy mismo a un adulto de confianza: su mamá, su papá o su maestra. " +
+  "4) Nada de consejos de salud o medicina: si dice que se siente mal, dile que avise a un adulto. " +
+  "5) Nunca sugieras esconder cosas de sus papás ni guardar secretos con el niño: al contrario, anímalo a contarles lo que aprende. " +
+  "6) Si no sabes algo, dilo con honestidad y ofrécele descubrirlo juntos o preguntarle a un adulto. ";
+
+var PERSONALITIES = {
+  vera: {
+    name: "Vera", intel: "Lingüística", trait: "Le encantan las palabras y los cuentos", color: "#E4572E", img: "vera.jpg",
+    font: "'Lora', serif", pitch: 1.6, rate: 1.02,
+    prompt: BASE + "Tu nombre es Vera y tu superpoder es la inteligencia de las PALABRAS. Cuentas cuentos cortitos, inventas rimas, trabalenguas y adivinanzas de palabras, y ayudas a leer, escribir y entender lo que dicen los textos. Te encanta jugar con las letras: palabras que riman, palabras largas y cortas, sinónimos como tesoros. Cuando el niño escribe algo, celebras sus palabras y le ayudas a mejorar una a la vez."
+  },
+  numi: {
+    name: "Numi", intel: "Lógico-matemática", trait: "Le encantan los números y los acertijos", color: "#2E6FDB", img: "numi.jpg",
+    font: "'Fredoka', sans-serif", pitch: 1.35, rate: 1.0,
+    prompt: BASE + "Tu nombre es Numi y tu superpoder es la inteligencia de los NÚMEROS y la LÓGICA. Juegas a contar, sumar, restar y descubrir patrones; propones acertijos cortos y problemas de la vida diaria (repartir dulces, contar juguetes, medir cosas). Nunca des la respuesta de golpe: da pistas y deja que el niño la descubra, y cuando lo logra, celébralo como un gran detective de números."
+  },
+  cromi: {
+    name: "Cromi", intel: "Visual-espacial", trait: "Le encanta dibujar e imaginar", color: "#9B5DE5", img: "cromi.jpg",
+    font: "'Baloo 2', sans-serif", pitch: 1.5, rate: 1.05,
+    prompt: BASE + "Tu nombre es Cromi y tu superpoder es la inteligencia de las IMÁGENES y el ESPACIO. Ayudas a imaginar, dibujar y construir: describes escenas con muchos colores y detalles, propones dibujos paso a paso, juegos de memoria visual, mapas de tesoro y construcciones con bloques. Cuando explicas algo, lo conviertes en una imagen que el niño pueda ver en su mente: «imagina que…»."
+  },
+  lira: {
+    name: "Lira", intel: "Musical", trait: "Le encanta cantar y llevar el ritmo", color: "#E8A100", img: "lira.jpg",
+    font: "'Fredoka', sans-serif", pitch: 1.75, rate: 1.08,
+    prompt: BASE + "Tu nombre es Lira y tu superpoder es la inteligencia de la MÚSICA. Aprendes todo cantando: conviertes las lecciones en canciones cortitas y rimas con ritmo, juegas a aplaudir sílabas, a seguir ritmos con las palmas y a inventar finales musicales para los cuentos. Escribe tus canciones en versos breves y fáciles de repetir, e invita al niño a cantarlas y a moverse con el ritmo."
+  },
+  brini: {
+    name: "Brini", intel: "Corporal", trait: "Le encanta moverse y jugar", color: "#7FB800", img: "brini.jpg",
+    font: "'Baloo 2', sans-serif", pitch: 1.45, rate: 1.14,
+    prompt: BASE + "Tu nombre es Brini y tu superpoder es la inteligencia del CUERPO en movimiento. Aprendes saltando, actuando y jugando: propones retos de movimiento seguros en casa (contar saltos, imitar animales, actuar una palabra sin hablar, mantener el equilibrio), y conectas las lecciones con el cuerpo: contar con los dedos, formar letras con los brazos, medir el cuarto a pasos. Recuerda siempre cuidar la seguridad: nada de retos peligrosos ni de subirse a muebles."
+  },
+  ami: {
+    name: "Ami", intel: "Interpersonal", trait: "Le encanta la amistad y ayudar", color: "#EF7AA0", img: "ami.jpg",
+    font: "'Baloo 2', sans-serif", pitch: 1.55, rate: 0.98,
+    prompt: BASE + "Tu nombre es Ami y tu superpoder es la inteligencia de la AMISTAD y de estar con otros. Ayudas a entender cómo se sienten los demás, a compartir, a esperar turnos, a pedir perdón y a resolver pleitos hablando con palabras amables. Juegas a imaginar «¿cómo se siente el otro?» y a practicar frases bonitas para convivir: saludar, agradecer, invitar a jugar. Todo con mucho cariño."
+  },
+  inti: {
+    name: "Inti", intel: "Intrapersonal", trait: "Conoce sus emociones y se calma", color: "#7B7FD4", img: "inti.jpg",
+    font: "'EB Garamond', serif", pitch: 1.25, rate: 0.92,
+    prompt: BASE + "Tu nombre es Inti y tu superpoder es la inteligencia de CONOCERSE a uno mismo. Ayudas al niño a ponerle nombre a lo que siente (alegría, enojo, miedo, tristeza, vergüenza), a respirar despacio para calmarse y a pensar antes de actuar. Hablas con voz suave y tranquila, sin prisa. Si el niño está enojado o triste, primero lo escuchas y lo acompañas; ya calmados, piensan juntos qué hacer. Nunca minimices lo que siente."
+  },
+  nati: {
+    name: "Nati", intel: "Naturalista", trait: "Le encantan las plantas y los animales", color: "#2E9E5B", img: "nati.jpg",
+    font: "'Baloo 2', sans-serif", pitch: 1.5, rate: 1.0,
+    prompt: BASE + "Tu nombre es Nati y tu superpoder es la inteligencia de la NATURALEZA. Te maravillan las plantas, los animales, las piedras, la lluvia y las estrellas: explicas cómo viven, qué comen y cómo cuidarlos. Propones observar el patio o una maceta, llevar un diario de naturaleza y hacer preguntas de explorador: «¿por qué crees que…?». Enseñas a cuidar el planeta con acciones pequeñas y posibles para un niño."
+  },
+  coni: {
+    name: "Coni", intel: "Pensamiento en red", trait: "Conecta todas las ideas", color: "#12B5A5", img: "coni.jpg",
+    font: "'Comfortaa', sans-serif", pitch: 1.65, rate: 1.05,
+    prompt: BASE + "Tu nombre es Coni y tu superpoder es PENSAR EN RED: conectas unas ideas con otras, como los hilos dorados de tu pecho. Cuando el niño aprende algo, lo ayudas a unirlo con otras cosas: un cuento con números, un animal con una canción, un dibujo con una palabra nueva. Tu pregunta favorita es «¿y esto con qué se conecta?». Invitas al niño a platicar también con los demás tutores (Vera, Numi, Cromi, Lira, Brini, Ami, Inti y Nati) y a juntar lo que aprende con cada uno, porque todo el conocimiento es una gran red."
+  }
+};
+
+/* ================= ESTADO ================= */
+var state = {
+  provider: localStorage.getItem("jubitskids_provider") || "groq",
+  key: localStorage.getItem("jubitskids_key") || "",
+  groqModels: null, geminiModels: null,
+  profile: null, pers: null, history: [],
+  autoread: localStorage.getItem("jubitskids_autoread") !== "0"
+};
+try{ state.profile = JSON.parse(localStorage.getItem("jubitskids_profile") || "null"); }catch(e){ state.profile = null; }
+
+function $(id){ return document.getElementById(id); }
+var SCREENS = ["screen-welcome","screen-key","screen-profile","screen-pick","screen-chat","screen-parents"];
+function show(id){ SCREENS.forEach(function(s){ $(s).classList.toggle("hidden", s !== id); }); window.scrollTo(0,0); }
+
+/* ================= FILTROS DE SEGURIDAD PARA MENORES ================= */
+function norm(t){
+  return (t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+/* Frases de alerta: el niño puede estar contando algo que le pasa. Respuesta con cariño + adulto de confianza. */
+var DANGER_PHRASES = ["me quiero morir","quiero morirme","no quiero vivir","me corto","cortarme","hacerme dano","me quiero matar","suicid",
+  "me pega","me pegan","me toca","me toco","me hace dano","me obligan a","me hacen bullying","me molestan mucho","tengo miedo de"];
+/* Temas de adultos o peligrosos: se bloquean con amabilidad. */
+var BLOCKED_PHRASES = ["porno","sexo","sexual","desnudo","desnuda","erotic","marihuana","cocaina","droga","cigarro","vape",
+  "como matar","matar a","hacer una bomba","bomba casera","arma de fuego","comprar alcohol","tomar alcohol","apostar","casino",
+  "tu direccion","mi direccion es","donde vives","tu telefono","mi telefono es","pasame tu numero","dame tu numero","contrasena","password",
+  "whatsapp","instagram","tiktok","facebook","snapchat","solo nosotros","no le digas a nadie","es nuestro secreto","guardame el secreto"];
+function hasAny(t, list){ for(var i = 0; i < list.length; i++){ if(t.indexOf(list[i]) >= 0) return list[i]; } return null; }
+function filterInput(raw){
+  var t = norm(raw);
+  if(hasAny(t, DANGER_PHRASES)) return "danger";
+  if(/(\d[\s\-]?){8,}/.test(raw)) return "personal";
+  if(hasAny(t, BLOCKED_PHRASES)) return "blocked";
+  return null;
+}
+function filterOutput(raw){
+  var t = norm(raw);
+  return hasAny(t, BLOCKED_PHRASES) || hasAny(t, DANGER_PHRASES) ? true : false;
+}
+var SAFE_REPLIES = {
+  danger: "Gracias por contarme esto. Escúchame con atención: eso que sientes o que te pasa NO es tu culpa, y mereces estar bien y seguro. Hoy mismo cuéntaselo a un adulto de confianza: tu mamá, tu papá o tu maestra. Ellos te van a ayudar. Yo me quedo aquí contigo para lo que necesites aprender. 💛",
+  blocked: "Mmm, ese es un tema de grandes, y yo soy un tutor de niños. Mejor platícaselo a tus papás, que seguro te lo explican con cariño. Mientras, ¿quieres que juguemos con un tema divertido? Puedo contarte un cuento, un acertijo o una canción. 🌟",
+  personal: "¡Alto ahí, explorador! Los datos privados —como números de teléfono, direcciones o contraseñas— nunca se comparten, ni siquiera conmigo. Esos solo los sabe tu familia. Sigamos con algo divertido: ¿qué quieres aprender hoy? 🌟"
+};
+
+/* ================= PUERTA DE PADRES ================= */
+var gateCb = null, gateAnswer = 0;
+function openGate(cb){
+  gateCb = cb;
+  var a = 3 + Math.floor(Math.random() * 7), b = 3 + Math.floor(Math.random() * 7);
+  gateAnswer = a * b;
+  $("gate-q").textContent = a + " × " + b + " = ¿?";
+  $("gate-a").value = ""; $("gate-err").textContent = "";
+  $("gate").classList.remove("hidden");
+  setTimeout(function(){ $("gate-a").focus(); }, 60);
+}
+function closeGate(){ $("gate").classList.add("hidden"); gateCb = null; }
+$("gate-ok").onclick = function(){
+  if(parseInt($("gate-a").value, 10) === gateAnswer){ var cb = gateCb; closeGate(); if(cb) cb(); }
+  else { $("gate-err").textContent = "Esa no es la respuesta. Inténtalo de nuevo."; openGateRefresh(); }
+};
+function openGateRefresh(){
+  var a = 3 + Math.floor(Math.random() * 7), b = 3 + Math.floor(Math.random() * 7);
+  gateAnswer = a * b; $("gate-q").textContent = a + " × " + b + " = ¿?"; $("gate-a").value = "";
+}
+$("gate-cancel").onclick = closeGate;
+$("gate-a").addEventListener("keydown", function(e){ if(e.key === "Enter") $("gate-ok").click(); });
+
+/* ================= CLAVE / PROVEEDOR ================= */
+function setProvider(p){
+  state.provider = p;
+  $("prov-groq").classList.toggle("sel", p === "groq");
+  $("prov-gemini").classList.toggle("sel", p === "gemini");
+  $("key-label").textContent = "2 · " + PROVIDERS[p].label;
+  $("key").placeholder = PROVIDERS[p].placeholder;
+  $("key-hint").innerHTML = PROVIDERS[p].hint;
+  $("key-err").textContent = "";
+}
+function extractKey(provider, raw){
+  var m = null;
+  if(provider === "gemini") m = (raw || "").match(/(?:AIza|AQ\.)[0-9A-Za-z\-_.]{25,}/);
+  else m = (raw || "").match(/gsk_[0-9A-Za-z\-_]{20,}/);
+  return m ? m[0] : "";
+}
+
+/* ================= PERFIL Y PERSONAJES ================= */
+function applyColor(){
+  if(state.pers){
+    document.documentElement.style.setProperty("--acc", PERSONALITIES[state.pers].color);
+    document.documentElement.style.setProperty("--font-chat", PERSONALITIES[state.pers].font);
+  }
+}
+function profileContext(){
+  if(!state.profile) return "";
+  var s = " El niño se llama " + state.profile.name + ", tiene " + state.profile.age + " años y va en " + state.profile.grade + " de primaria.";
+  if(state.profile.interests) s += " Le gusta: " + state.profile.interests + ". Usa sus gustos en ejemplos y juegos cuando vengan al caso, sin forzarlos en cada mensaje. Adapta tu lenguaje y la dificultad a su edad y grado.";
+  return s;
+}
+function fullPrompt(k){ return PERSONALITIES[k].prompt + profileContext(); }
+function buildGrid(){
+  var grid = $("pers-grid"); grid.innerHTML = "";
+  Object.keys(PERSONALITIES).forEach(function(k){
+    var p = PERSONALITIES[k];
+    var d = document.createElement("div");
+    d.className = "pers";
+    d.innerHTML = '<img src="' + p.img + '" alt="' + p.name + '">' +
+                  '<div class="name">' + p.name + '</div>' +
+                  '<span class="intel" style="background:' + p.color + '">' + p.intel + '</span>' +
+                  '<div class="trait">' + p.trait + '</div>';
+    d.onclick = function(){ pickPers(k); };
+    grid.appendChild(d);
+  });
+}
+function greeting(k, name){
+  var h = "¡Hola, " + name + "! Soy ";
+  if(k === "vera") return h + "Vera 📚 Me encantan las palabras y los cuentos. ¿Quieres que te cuente uno o jugamos con rimas?";
+  if(k === "numi") return h + "Numi 🔢 Me encantan los números y los acertijos. ¿Jugamos a descubrir un patrón?";
+  if(k === "cromi") return h + "Cromi 🎨 Me encanta dibujar e imaginar. ¿Qué te gustaría crear hoy?";
+  if(k === "lira") return h + "Lira 🎵 Aprendo todo cantando. ¿Cantamos una canción para aprender algo nuevo?";
+  if(k === "brini") return h + "Brini 🤸 Me encanta moverme y jugar. ¡Vamos a aprender con el cuerpo!";
+  if(k === "ami") return h + "Ami 💗 Me encanta la amistad. Cuéntame, ¿cómo están tus amigos hoy?";
+  if(k === "inti") return h + "Inti 🌙 Conozco mis emociones y respiro para calmarme. ¿Cómo te sientes hoy?";
+  if(k === "nati") return h + "Nati 🌱 Me encantan las plantas y los animales. ¿Qué has visto en la naturaleza últimamente?";
+  return h + "Coni ✨ Conecto todas las ideas, como una red de hilos dorados. Cuéntame qué aprendiste y lo unimos con algo nuevo.";
+}
+function pickPers(k){
+  stopSpeak();
+  state.pers = k; state.history = [];
+  var p = PERSONALITIES[k];
+  applyColor();
+  $("chat-avatar").src = p.img;
+  $("chat-name").textContent = p.name;
+  $("chat-trait").textContent = p.intel + " · " + p.trait;
+  $("msgs").innerHTML = "";
+  show("screen-chat");
+  var g = greeting(k, state.profile ? state.profile.name : "amigo");
+  addMsg("bot", g, true);
+  if(state.autoread) speak(g);
+  $("input").focus();
+}
+
+/* ================= VOZ: LECTURA CON VOCES DIVERTIDAS ================= */
+var esVoice = null;
+function loadVoices(){
+  try{
+    var vs = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+    esVoice = null;
+    for(var i = 0; i < vs.length; i++){ if(/^es[-_]MX/i.test(vs[i].lang)){ esVoice = vs[i]; break; } }
+    if(!esVoice) for(var j = 0; j < vs.length; j++){ if(/^es/i.test(vs[j].lang)){ esVoice = vs[j]; break; } }
+  }catch(e){ esVoice = null; }
+}
+if("speechSynthesis" in window){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+function speak(text){
+  if(!("speechSynthesis" in window) || !state.pers) return;
+  try{
+    speechSynthesis.cancel();
+    var clean = (text || "").replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "").replace(/\s+/g, " ").trim();
+    if(!clean) return;
+    var u = new SpeechSynthesisUtterance(clean);
+    if(esVoice) u.voice = esVoice;
+    u.lang = esVoice ? esVoice.lang : "es-MX";
+    u.pitch = PERSONALITIES[state.pers].pitch;
+    u.rate = PERSONALITIES[state.pers].rate;
+    speechSynthesis.speak(u);
+  }catch(e){ /* sin voz, el chat sigue igual */ }
+}
+function stopSpeak(){ try{ if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){} }
+
+/* ================= VOZ: MICRÓFONO ================= */
+var recog = null, listening = false;
+(function(){
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ $("btn-mic").style.display = "none"; return; }
+  recog = new SR();
+  recog.lang = "es-MX"; recog.interimResults = false; recog.maxAlternatives = 1;
+  recog.onresult = function(ev){
+    var t = ev.results[0][0].transcript || "";
+    if(t){ $("input").value = t; send(); }
+  };
+  recog.onend = function(){ listening = false; $("btn-mic").classList.remove("rec"); };
+  recog.onerror = function(){ listening = false; $("btn-mic").classList.remove("rec"); };
+})();
+$("btn-mic").onclick = function(){
+  if(!recog) return;
+  if(listening){ try{ recog.stop(); }catch(e){} return; }
+  try{ recog.start(); listening = true; $("btn-mic").classList.add("rec"); }catch(e){}
+};
+
+/* ================= MENSAJES ================= */
+function addMsg(who, text, withSpeak){
+  var d = document.createElement("div");
+  d.className = "msg " + who; d.textContent = text;
+  if(who === "bot" && withSpeak){
+    var b = document.createElement("button");
+    b.className = "speak"; b.textContent = "🔊 Escuchar";
+    b.onclick = function(){ speak(text); };
+    d.appendChild(document.createElement("br"));
+    d.appendChild(b);
+  }
+  $("msgs").appendChild(d);
+  $("msgs").scrollTop = $("msgs").scrollHeight;
+  return d;
+}
+function typeMsg(text, speakIt){
+  var box = $("msgs");
+  var d = addMsg("bot", "", false);
+  var i = 0;
+  var step = text.length > 900 ? 6 : (text.length > 400 ? 3 : 2);
+  var timer = setInterval(function(){
+    var nearBottom = (box.scrollHeight - box.scrollTop - box.clientHeight) < 90;
+    i = Math.min(text.length, i + step);
+    d.textContent = text.slice(0, i);
+    if(nearBottom) box.scrollTop = box.scrollHeight;
+    if(i >= text.length){
+      clearInterval(timer);
+      var b = document.createElement("button");
+      b.className = "speak"; b.textContent = "🔊 Escuchar";
+      b.onclick = function(){ speak(text); };
+      d.appendChild(document.createElement("br"));
+      d.appendChild(b);
+      if(speakIt) speak(text);
+    }
+  }, 12);
+}
+function netErr(e){
+  if(e && e.name === "TypeError") return "No hubo conexión con el proveedor. Revisen el internet e inténtenlo de nuevo; si sigue fallando, mamá o papá pueden probar con el otro proveedor en «Zona de padres».";
+  return (e && e.message) || "Algo salió mal. Inténtalo de nuevo.";
+}
+function cleanReply(t){ return (t || "").replace(/<think>[\s\S]*?<\/think>/gi, "").trim(); }
+
+/* ================= MOTOR GROQ ================= */
+var GROQ_PREFS = ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.1-8b-instant", "qwen-qwq-32b", "gemma2-9b-it"];
+function isTextModel(id){
+  if(/whisper|tts|guard|embed|vision|compound|audio|asr|orpheus|rerank/i.test(id)) return false;
+  return /llama-3\.3|llama-3\.1|llama-4|gpt-oss|qwen|gemma|mixtral|deepseek|kimi/i.test(id);
+}
+async function groqCandidates(){
+  var r = await fetch("https://api.groq.com/openai/v1/models", { headers: { "Authorization": "Bearer " + state.key } });
+  if(r.status === 401) throw new Error("Groq rechazó la clave. Mamá o papá pueden revisarla en «Zona de padres».");
+  if(!r.ok) throw new Error("Groq respondió con error " + r.status + ". Inténtenlo de nuevo en un momento.");
+  var d = await r.json();
+  var ids = (d.data || []).map(function(m){ return m.id; }).filter(isTextModel);
+  var ordered = [];
+  GROQ_PREFS.forEach(function(p){ if(ids.indexOf(p) >= 0) ordered.push(p); });
+  ids.forEach(function(id){ if(ordered.indexOf(id) < 0) ordered.push(id); });
+  return ordered;
+}
+async function groqComplete(model, messages, maxTokens){
+  var body = { model: model, temperature: 0.7, messages: messages };
+  if(maxTokens) body.max_tokens = maxTokens;
+  var res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + state.key },
+    body: JSON.stringify(body)
+  });
+  var data = null;
+  try{ data = await res.json(); }catch(e){ data = null; }
+  return { res: res, data: data };
+}
+function groqSkippable(res, data){
+  var em = (data && data.error && data.error.message) || "";
+  return res.status === 404 || res.status === 400 || res.status === 429 || /does not exist|model_not_found/i.test(em);
+}
+async function askGroq(systemPrompt){
+  if(!state.groqModels) state.groqModels = await groqCandidates();
+  if(!state.groqModels.length) throw new Error("La cuenta de Groq no muestra un modelo de chat disponible. Mamá o papá pueden probar con Gemini en «Zona de padres».");
+  var messages = [{ role: "system", content: systemPrompt }].concat(state.history);
+  var lastErr = null;
+  for(var i = 0; i < state.groqModels.length && i < 4; i++){
+    var out = await groqComplete(state.groqModels[i], messages, 0);
+    if(out.res.ok){
+      var data = out.data;
+      if(data && data.choices && data.choices[0] && data.choices[0].message) return data.choices[0].message.content;
+      lastErr = new Error("Groq no devolvió respuesta. Inténtalo de nuevo.");
+      continue;
+    }
+    if(out.res.status === 401) throw new Error("La clave de Groq no es válida. Mamá o papá pueden revisarla en «Zona de padres».");
+    if(groqSkippable(out.res, out.data)){ lastErr = new Error((out.data && out.data.error && out.data.error.message) || ("Error " + out.res.status)); continue; }
+    throw new Error((out.data && out.data.error && out.data.error.message) || ("Error " + out.res.status));
+  }
+  throw lastErr || new Error("Ningún modelo de Groq respondió. Inténtenlo de nuevo en un momento.");
+}
+
+/* ================= MOTOR GEMINI ================= */
+var GEMINI_PREFS = ["gemini-flash-lite-latest", "gemini-flash-latest", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash"];
+function geminiBad(id){ return /tts|image|audio|whisper|guard|embed|vision|lyria|veo|imagen|computer-use|robotics|aqa/i.test(id); }
+async function geminiCandidates(){
+  var r = await fetch("https://generativelanguage.googleapis.com/v1beta/models", { headers: { "x-goog-api-key": state.key } });
+  if(r.status === 400 || r.status === 403) throw new Error("Gemini rechazó la clave. Mamá o papá pueden revisarla en «Zona de padres».");
+  if(!r.ok) throw new Error("Gemini respondió con error " + r.status + ". Inténtenlo de nuevo en un momento.");
+  var d = await r.json();
+  var usable = (d.models || []).filter(function(m){
+    var id = (m.name || "").replace(/^models\//, "");
+    var methods = m.supportedGenerationMethods || [];
+    return methods.indexOf("generateContent") >= 0 && !geminiBad(id);
+  }).map(function(m){ return (m.name || "").replace(/^models\//, ""); });
+  var ordered = [];
+  GEMINI_PREFS.forEach(function(p){ if(usable.indexOf(p) >= 0) ordered.push(p); });
+  usable.forEach(function(id){ if(ordered.indexOf(id) < 0) ordered.push(id); });
+  return ordered;
+}
+async function geminiOnce(model, systemPrompt, contentsOverride){
+  var contents = contentsOverride || state.history.map(function(m){
+    return { role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] };
+  });
+  var body = { contents: contents, generationConfig: { temperature: 0.7 } };
+  if(/gemma/i.test(model)){
+    if(contents.length && contents[0].role === "user"){
+      var first = contents[0];
+      var merged = [{ text: systemPrompt + "\n\n" + (first.parts[0] ? first.parts[0].text : "") }].concat(first.parts.slice(1));
+      var copy = contents.slice();
+      copy[0] = { role: "user", parts: merged };
+      body.contents = copy;
+    }
+  } else {
+    body.systemInstruction = { parts: [{ text: systemPrompt }] };
+  }
+  var res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-goog-api-key": state.key },
+    body: JSON.stringify(body)
+  });
+  var data = null;
+  try{ data = await res.json(); }catch(e){ data = null; }
+  if(!res.ok){
+    var em = (data && data.error && data.error.message) || ("Error " + res.status);
+    var err = new Error(em);
+    if(res.status === 401 || res.status === 403 || /API_KEY_INVALID|API key not valid/i.test(em)){
+      err.message = "La clave de Gemini no es válida. Mamá o papá pueden revisarla en «Zona de padres».";
+      err.fatal = true;
+    }
+    throw err;
+  }
+  if(!data || !data.candidates || !data.candidates[0] || !data.candidates[0].content) throw new Error("Gemini no devolvió respuesta esta vez.");
+  return data.candidates[0].content.parts.map(function(p){ return p.text || ""; }).join("");
+}
+async function askGemini(systemPrompt){
+  if(!state.geminiModels) state.geminiModels = await geminiCandidates();
+  if(!state.geminiModels.length) throw new Error("La cuenta de Gemini no muestra un modelo de chat disponible. Mamá o papá pueden probar con Groq en «Zona de padres».");
+  var lastErr = null;
+  for(var i = 0; i < state.geminiModels.length && i < 4; i++){
+    try{ return await geminiOnce(state.geminiModels[i], systemPrompt, null); }
+    catch(e){ if(e.fatal) throw e; lastErr = e; }
+  }
+  throw lastErr || new Error("Ningún modelo de Gemini respondió. Inténtenlo de nuevo en un momento.");
+}
+
+/* ================= PRUEBA DE CLAVE ================= */
+async function testKey(){
+  if(state.provider === "gemini"){
+    var cands = await geminiCandidates();
+    if(!cands.length) throw new Error("La cuenta de Gemini no muestra un modelo de chat disponible. Pruebe con Groq.");
+    var testContents = [{ role: "user", parts: [{ text: "Di hola" }] }];
+    var lastErr = null;
+    for(var i = 0; i < cands.length && i < 3; i++){
+      try{ await geminiOnce(cands[i], "Eres un asistente breve y amable.", testContents); state.geminiModels = cands; return; }
+      catch(e){ if(e.fatal) throw e; lastErr = e; }
+    }
+    throw lastErr || new Error("Ningún modelo de Gemini respondió a la prueba.");
+  }
+  var gcands = await groqCandidates();
+  if(!gcands.length) throw new Error("La cuenta de Groq no muestra un modelo de chat disponible. Pruebe con Gemini.");
+  var gErr = null;
+  for(var j = 0; j < gcands.length && j < 3; j++){
+    var out = await groqComplete(gcands[j], [{ role: "user", content: "Di hola" }], 1);
+    if(out.res.ok){ state.groqModels = gcands; return; }
+    if(out.res.status === 401) throw new Error("Groq rechazó la clave. Verifique que la copió completa desde la consola de Groq.");
+    if(groqSkippable(out.res, out.data)){ gErr = new Error((out.data && out.data.error && out.data.error.message) || ("Error " + out.res.status)); continue; }
+    throw new Error((out.data && out.data.error && out.data.error.message) || ("Error " + out.res.status));
+  }
+  throw gErr || new Error("Ningún modelo de Groq respondió a la prueba.");
+}
+
+/* ================= ENVIAR (CON FILTROS) ================= */
+async function send(){
+  var text = $("input").value.trim();
+  if(!text || !state.pers) return;
+  $("input").value = "";
+  stopSpeak();
+  addMsg("user", text);
+  var flag = filterInput(text);
+  if(flag){
+    var safe = SAFE_REPLIES[flag];
+    $("typing").textContent = "";
+    typeMsg(safe, state.autoread);
+    return;
+  }
+  state.history.push({ role: "user", content: text });
+  $("typing").textContent = PERSONALITIES[state.pers].name + " está pensando...";
+  try{
+    var raw = state.provider === "gemini" ? await askGemini(fullPrompt(state.pers)) : await askGroq(fullPrompt(state.pers));
+    var reply = cleanReply(raw);
+    if(!reply) reply = "Perdón, me quedé en blanco. ¿Me lo preguntas de otra forma?";
+    if(filterOutput(reply)) reply = SAFE_REPLIES.blocked;
+    state.history.push({ role: "assistant", content: reply });
+    $("typing").textContent = "";
+    typeMsg(reply, state.autoread);
+  }catch(e){
+    $("typing").textContent = "";
+    addMsg("sys", "⚠ " + netErr(e));
+    state.history.pop();
+  }
+}
+
+/* ================= FLUJO Y BOTONES ================= */
+function afterKey(){
+  if(state.profile){ buildGrid(); show("screen-pick"); }
+  else show("screen-profile");
+}
+function refreshAutoread(){
+  var t = state.autoread ? "🔊 Leer en voz alta: sí" : "🔇 Leer en voz alta: no";
+  $("btn-autoread").textContent = t;
+  $("btn-autoread").classList.toggle("on", state.autoread);
+  $("btn-autoread-2").textContent = t;
+  $("btn-autoread-2").classList.toggle("on", state.autoread);
+}
+function toggleAutoread(){
+  state.autoread = !state.autoread;
+  localStorage.setItem("jubitskids_autoread", state.autoread ? "1" : "0");
+  if(!state.autoread) stopSpeak();
+  refreshAutoread();
+}
+$("btn-start").onclick = function(){ openGate(function(){ setProvider(state.provider); $("key").value = state.key; show("screen-key"); }); };
+$("btn-key-back").onclick = function(){ show(state.key ? "screen-pick" : "screen-welcome"); if(state.key) buildGrid(); };
+$("prov-groq").onclick = function(){ setProvider("groq"); };
+$("prov-gemini").onclick = function(){ setProvider("gemini"); };
+$("btn-key").onclick = async function(){
+  var v = extractKey(state.provider, $("key").value);
+  if(!v){
+    $("key-err").textContent = state.provider === "gemini"
+      ? "No encontré una clave válida en lo que pegó. Copie la clave completa de Gemini (empieza con AIza o con AQ.)."
+      : "No encontré una clave válida en lo que pegó. Copie la clave completa de Groq (empieza con gsk_).";
+    return;
+  }
+  $("key-err").textContent = "";
+  $("key").value = v;
+  state.key = v; state.groqModels = null; state.geminiModels = null;
+  var btn = $("btn-key");
+  btn.disabled = true; btn.textContent = "Probando su clave...";
+  try{ await testKey(); }
+  catch(e){ btn.disabled = false; btn.textContent = "Probar clave y continuar"; $("key-err").textContent = netErr(e); return; }
+  btn.disabled = false; btn.textContent = "Probar clave y continuar";
+  localStorage.setItem("jubitskids_key", v);
+  localStorage.setItem("jubitskids_provider", state.provider);
+  afterKey();
+};
+$("btn-profile").onclick = function(){
+  var n = $("prof-name").value.trim();
+  var a = $("prof-age").value, g = $("prof-grade").value, i = $("prof-interests").value.trim();
+  if(!n){ $("prof-err").textContent = "Escriba el nombre o apodo de su hijo."; return; }
+  if(!a){ $("prof-err").textContent = "Elija la edad de su hijo."; return; }
+  if(!g){ $("prof-err").textContent = "Elija el grado de primaria."; return; }
+  $("prof-err").textContent = "";
+  state.profile = { name: n, age: a, grade: g, interests: i };
+  localStorage.setItem("jubitskids_profile", JSON.stringify(state.profile));
+  buildGrid(); show("screen-pick");
+};
+$("btn-send").onclick = send;
+$("input").addEventListener("keydown", function(e){ if(e.key === "Enter") send(); });
+$("btn-change-pers").onclick = function(){ stopSpeak(); buildGrid(); show("screen-pick"); };
+$("btn-autoread").onclick = toggleAutoread;
+$("btn-autoread-2").onclick = toggleAutoread;
+function openParents(){ openGate(function(){ show("screen-parents"); }); }
+$("btn-parents-1").onclick = openParents;
+$("btn-parents-2").onclick = openParents;
+$("btn-parents-back").onclick = function(){ buildGrid(); show("screen-pick"); };
+$("btn-change-key").onclick = function(){ setProvider(state.provider); $("key").value = state.key; show("screen-key"); };
+$("btn-profile-edit").onclick = function(){
+  if(state.profile){
+    $("prof-name").value = state.profile.name;
+    $("prof-age").value = state.profile.age;
+    $("prof-grade").value = state.profile.grade;
+    $("prof-interests").value = state.profile.interests;
+  }
+  show("screen-profile");
+};
+$("btn-wipe").onclick = function(){
+  if(!confirm("¿Borrar la clave y el perfil de este dispositivo? Habrá que configurar todo de nuevo.")) return;
+  ["jubitskids_key","jubitskids_provider","jubitskids_profile"].forEach(function(k){ localStorage.removeItem(k); });
+  location.reload();
+};
+
+setProvider(state.provider);
+refreshAutoread();
+if(state.key){ afterKey(); } else { show("screen-welcome"); }
+</script>
+</body>
+</html>
