@@ -38,3 +38,4 @@ Tutores con inteligencia artificial para niños de **primaria**, basados en la t
 Una sola página (`index.html`), sin servidor: llama directamente a las APIs de Groq y Gemini desde el navegador, con descubrimiento dinámico de modelos y cascada de respaldo (hasta 4 modelos). Voz con Web Speech API (`speechSynthesis` + `SpeechRecognition` en español de México).
 
 Hecho con la Filosofía Josefina: «Hacer siempre y en todo lo mejor».
+
