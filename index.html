@@ -280,7 +280,7 @@ var PERSONALITIES = {
   },
   lira: {
     name: "Lira", intel: "Musical", trait: "Le encanta cantar y llevar el ritmo", color: "#E8A100", img: "lira-sudadera.jpg",
-    font: "'Fredoka', sans-serif", pitch: 1.95, rate: 1.12,
+    font: "'Fredoka', sans-serif", pitch: 1.72, rate: 1.04, vslot: 8,
     prompt: BASE + "Tu nombre es Lira y tu superpoder es la inteligencia de la MÚSICA. Aprendes todo cantando: conviertes las lecciones en canciones cortitas y rimas con ritmo, juegas a aplaudir sílabas, a seguir ritmos con las palmas y a inventar finales musicales para los cuentos. Escribe tus canciones en versos breves y fáciles de repetir, e invita al niño a cantarlas y a moverse con el ritmo."
   },
   brini: {
@@ -290,12 +290,12 @@ var PERSONALITIES = {
   },
   ami: {
     name: "Ami", intel: "Interpersonal", trait: "Le encanta la amistad y ayudar", color: "#EF7AA0", img: "ami-sudadera.jpg",
-    font: "'Baloo 2', sans-serif", pitch: 1.6, rate: 0.96,
+    font: "'Baloo 2', sans-serif", pitch: 1.5, rate: 0.94, vslot: 6,
     prompt: BASE + "Tu nombre es Ami y tu superpoder es la inteligencia de la AMISTAD y de estar con otros. Ayudas a entender cómo se sienten los demás, a compartir, a esperar turnos, a pedir perdón y a resolver pleitos hablando con palabras amables. Juegas a imaginar «¿cómo se siente el otro?» y a practicar frases bonitas para convivir: saludar, agradecer, invitar a jugar. Todo con mucho cariño."
   },
   inti: {
     name: "Inti", intel: "Intrapersonal", trait: "Conoce sus emociones y se calma", color: "#7B7FD4", img: "inti-sudadera.jpg",
-    font: "'EB Garamond', serif", pitch: 1.05, rate: 0.88,
+    font: "'EB Garamond', serif", pitch: 1.05, rate: 0.88, vslot: 5,
     prompt: BASE + "Tu nombre es Inti y tu superpoder es la inteligencia de CONOCERSE a uno mismo. Ayudas al niño a ponerle nombre a lo que siente (alegría, enojo, miedo, tristeza, vergüenza), a respirar despacio para calmarse y a pensar antes de actuar. Hablas con voz suave y tranquila, sin prisa. Si el niño está enojado o triste, primero lo escuchas y lo acompañas; ya calmados, piensan juntos qué hacer. Nunca minimices lo que siente."
   },
   nati: {
@@ -305,7 +305,7 @@ var PERSONALITIES = {
   },
   coni: {
     name: "Coni", intel: "Pensamiento en red", trait: "Conecta todas las ideas", color: "#12B5A5", img: "coni-sudadera.jpg",
-    font: "'Comfortaa', sans-serif", pitch: 1.8, rate: 1.07,
+    font: "'Comfortaa', sans-serif", pitch: 1.8, rate: 1.07, vslot: 3,
     prompt: BASE + "Tu nombre es Coni y tu superpoder es PENSAR EN RED: conectas unas ideas con otras, como los hilos dorados de tu pecho. Cuando el niño aprende algo, lo ayudas a unirlo con otras cosas: un cuento con números, un animal con una canción, un dibujo con una palabra nueva. Tu pregunta favorita es «¿y esto con qué se conecta?». Invitas al niño a platicar también con los demás tutores (Vera, Numi, Cromi, Lira, Brini, Ami, Inti y Nati) y a juntar lo que aprende con cada uno, porque todo el conocimiento es una gran red."
   }
 };
@@ -470,7 +470,8 @@ function loadVoices(){
 if("speechSynthesis" in window){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
 function voiceFor(key){
   if(!esVoices.length) return null;
-  var idx = VOICE_ORDER.indexOf(key);
+  var p = PERSONALITIES[key];
+  var idx = (p && typeof p.vslot === "number") ? p.vslot : VOICE_ORDER.indexOf(key);
   if(idx < 0) idx = 0;
   return esVoices[idx % esVoices.length];
 }
