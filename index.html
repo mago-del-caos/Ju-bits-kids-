@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ju-bits Kids — Tutores para primaria</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#12B5A5">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ju-bits Kids">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Fredoka:wght@500;600&family=Lora:ital@0;1&family=EB+Garamond&family=Comfortaa:wght@600;700&display=swap" rel="stylesheet">
 <style>
@@ -786,6 +794,32 @@ $("btn-wipe").onclick = function(){
 setProvider(state.provider);
 refreshAutoread();
 if(state.key){ afterKey(); } else { show("screen-welcome"); }
+</script>
+<script>
+/* App web descargable (PWA): registro del service worker y botón de instalación. */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  });
+}
+var jbkPrompt = null;
+window.addEventListener("beforeinstallprompt", function (e) {
+  e.preventDefault();
+  jbkPrompt = e;
+  var b = document.createElement("button");
+  b.id = "btn-install";
+  b.textContent = "📲 Instalar Ju-bits Kids en este dispositivo";
+  b.style.cssText = "position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:80;background:#12B5A5;color:#fff;border:none;border-radius:999px;padding:12px 20px;font-family:inherit;font-size:1rem;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer;max-width:92vw;";
+  b.onclick = function () {
+    b.remove();
+    if (jbkPrompt) { jbkPrompt.prompt(); jbkPrompt = null; }
+  };
+  document.body.appendChild(b);
+});
+window.addEventListener("appinstalled", function () {
+  var b = document.getElementById("btn-install");
+  if (b) b.remove();
+});
 </script>
 </body>
 </html>
