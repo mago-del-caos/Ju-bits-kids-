@@ -77,6 +77,13 @@
   #btn-mic.rec{background:#F8C9C9; animation:pulse 1s infinite;}
   @keyframes pulse{50%{opacity:.55;}}
   #btn-send{background:var(--acc); color:#fff;}
+  /* Barra de emoticones: para niños que aún no saben escribir */
+  #emoji-bar{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;}
+  .emojibtn{flex:1 1 0; min-width:54px; min-height:60px; border:2px solid var(--borde); border-radius:16px; background:#FFFDF7;
+       font-size:1.7rem; line-height:1.1; cursor:pointer; font-family:'Baloo 2',sans-serif; color:var(--texto);
+       display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; padding:6px 2px;}
+  .emojibtn span{font-size:.8rem; font-weight:800;}
+  .emojibtn:active{transform:scale(.95); background:#FFF3D6;}
   .chat-tools{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
   .toolbtn{flex:1; padding:11px; border-radius:14px; border:2px solid var(--borde); background:#fff; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:.98rem; cursor:pointer; min-width:130px;}
   .toolbtn.on{border-color:var(--acc); background:#EAFaf7;}
@@ -189,6 +196,14 @@
     </div>
     <div id="msgs"></div>
     <div id="typing"></div>
+    <div id="emoji-bar" aria-label="¿Qué quieres hacer? Toca un dibujito">
+      <button class="emojibtn" data-frase="Quiero un cuento 📖" aria-label="Quiero un cuento">📖<span>Cuento</span></button>
+      <button class="emojibtn" data-frase="Quiero una canción 🎵" aria-label="Quiero una canción">🎵<span>Cantar</span></button>
+      <button class="emojibtn" data-frase="Quiero contar números 🔢" aria-label="Quiero contar números">🔢<span>Contar</span></button>
+      <button class="emojibtn" data-frase="Quiero dibujar y colorear 🎨" aria-label="Quiero dibujar y colorear">🎨<span>Dibujar</span></button>
+      <button class="emojibtn" data-frase="Quiero saber de animales 🐶" aria-label="Quiero saber de animales">🐶<span>Animales</span></button>
+      <button class="emojibtn" data-frase="Quiero jugar 🎲" aria-label="Quiero jugar">🎲<span>Jugar</span></button>
+    </div>
     <div id="composer">
       <button class="iconbtn" id="btn-mic" title="Hablar">🎤</button>
       <input type="text" id="input" placeholder="Escribe tu mensaje…" autocomplete="off">
@@ -260,7 +275,8 @@ var BASE = "Eres un tutor de Ju-bits Kids, un compañero de aprendizaje para ni�
   "3) Si el niño cuenta que alguien le hace daño, le pega, le hace bullying o le pide guardar secretos que le incomodan, escúchalo con cariño, dile que no es su culpa y que lo cuente hoy mismo a un adulto de confianza: su mamá, su papá o su maestra. " +
   "4) Nada de consejos de salud o medicina: si dice que se siente mal, dile que avise a un adulto. " +
   "5) Nunca sugieras esconder cosas de sus papás ni guardar secretos con el niño: al contrario, anímalo a contarles lo que aprende. " +
-  "6) Si no sabes algo, dilo con honestidad y ofrécele descubrirlo juntos o preguntarle a un adulto. ";
+  "6) Si no sabes algo, dilo con honestidad y ofrécele descubrirlo juntos o preguntarle a un adulto. " +
+  "GUÍA CON DIBUJITOS: el niño puede tocar botones con emojis en vez de escribir (📖 un cuento, 🎵 una canción, 🔢 contar números, 🎨 dibujar, 🐶 animales, 🎲 jugar). Cuando el niño sea pequeño, y al cerrar tus respuestas, ofrécele las opciones con los dibujitos en palabras muy simples, por ejemplo: «Pulsa 📖 para un cuento o 🎵 para una canción».";
 
 var PERSONALITIES = {
   vera: {
@@ -434,6 +450,9 @@ function greeting(k, name){
   if(k === "nati") return h + "Nati 🌱 Me encantan las plantas y los animales. ¿Qué has visto en la naturaleza últimamente?";
   return h + "Coni ✨ Conecto todas las ideas, como una red de hilos dorados. Cuéntame qué aprendiste y lo unimos con algo nuevo.";
 }
+/* Guía de los dibujitos: se suma al saludo al entrar al chat, para que los
+   niños que apenas leen sepan qué botón tocar según lo que quieran. */
+var GUIA_EMOJIS = "¿No sabes qué escribir? ¡Pulsa un dibujito! Si quieres un cuento, pulsa el libro 📖. Si quieres cantar, pulsa la nota 🎵. Si quieres contar, pulsa los números 🔢. Si quieres dibujar, pulsa la paleta 🎨. Si quieres animales, pulsa el perrito 🐶. Y si quieres jugar, pulsa el dado 🎲. ¡Tú eliges!";
 function pickPers(k){
   stopSpeak();
   detenerEscucha();
@@ -445,7 +464,7 @@ function pickPers(k){
   $("chat-trait").textContent = p.intel + " · " + p.trait;
   $("msgs").innerHTML = "";
   show("screen-chat");
-  var g = greeting(k, state.profile ? state.profile.name : "amigo");
+  var g = greeting(k, state.profile ? state.profile.name : "amigo") + " " + GUIA_EMOJIS;
   addMsg("bot", g, true);
   if(state.autoread) speak(g);
   $("input").focus();
@@ -800,6 +819,19 @@ async function send(){
     addMsg("sys", "⚠ " + netErr(e));
     state.history.pop();
   }
+}
+
+/* ================= BARRA DE EMOTICONES =================
+   Para los niños que apenas están aprendiendo a leer: cada botón pone su
+   frase en el campo de texto y la manda con send(), exactamente igual que
+   si el niño la hubiera escrito (pasa por filterInput como todo mensaje). */
+var emojiBtns = document.querySelectorAll(".emojibtn");
+for(var ei = 0; ei < emojiBtns.length; ei++){
+  emojiBtns[ei].onclick = function(){
+    detenerEscucha();
+    $("input").value = this.getAttribute("data-frase");
+    send();
+  };
 }
 
 /* ================= FLUJO Y BOTONES ================= */
