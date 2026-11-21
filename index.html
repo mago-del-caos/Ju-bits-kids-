@@ -436,6 +436,7 @@ function greeting(k, name){
 }
 function pickPers(k){
   stopSpeak();
+  detenerEscucha();
   state.pers = k; state.history = [];
   var p = PERSONALITIES[k];
   applyColor();
@@ -475,11 +476,40 @@ function voiceFor(key){
   if(idx < 0) idx = 0;
   return esVoices[idx % esVoices.length];
 }
+/* Limpieza de formato SOLO para la voz: quita los símbolos de markdown
+   (negritas, listas, enlaces…) para que la voz no lea «asterisco» ni «guion».
+   El globo de chat conserva su texto original; esto solo prepara lo que
+   se manda a speechSynthesis. Los signos de entonación (., ¡! ¿?) se quedan. */
+function limpiarParaVoz(texto){
+  var t = texto || "";
+  t = t.replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1");   /* imagen: queda su texto */
+  t = t.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1");    /* enlace: queda solo el texto */
+  t = t.replace(/~~([^~]+)~~/g, "$1");              /* tachado */
+  t = t.replace(/```/g, " ").replace(/`/g, "");     /* bloques de código y código en línea */
+  t = t.replace(/^\s{0,3}#{1,6}\s+/gm, "");         /* encabezados */
+  t = t.replace(/^\s*>\s?/gm, "");                  /* citas */
+  t = t.replace(/^\s*[-*•]\s+/gm, "");              /* viñetas al inicio de línea */
+  t = t.replace(/\*\*([^*]+)\*\*/g, "$1");          /* negritas con asteriscos */
+  t = t.replace(/\*([^*]+)\*/g, "$1");              /* cursivas con asterisco */
+  t = t.replace(/__([^_]+)__/g, "$1");              /* negritas con guiones bajos */
+  t = t.replace(/_([^_]+)_/g, "$1");                /* cursivas con guion bajo */
+  t = t.replace(/[*#~]/g, "");                      /* símbolos sueltos que queden */
+  t = t.replace(/_+/g, " ");                        /* guiones bajos sueltos */
+  t = t.replace(/(\d)\s+-\s+(\d)/g, "$1 menos $2"); /* resta entre números: se dice «menos» */
+  t = t.replace(/\s+-\s+/g, ", ");                  /* guion suelto entre espacios: pausa */
+  t = t.replace(/([.!?…;:])\s*\n\s*/g, "$1 ");      /* salto de línea tras un signo: pausa normal */
+  t = t.replace(/\s*\n\s*/g, ". ");                 /* otros saltos de línea: pausa con punto */
+  t = t.replace(/\s+([.,!?;:])/g, "$1");            /* sin espacio antes del signo */
+  t = t.replace(/\.\s*\./g, ".");                   /* sin puntos duplicados */
+  t = t.replace(/\s+/g, " ").trim();                /* espacios colapsados */
+  t = t.replace(/^\.\s*/, "");                      /* sin punto colgando al inicio */
+  return t;
+}
 function speak(text){
   if(!("speechSynthesis" in window) || !state.pers) return;
   try{
     speechSynthesis.cancel();
-    var clean = (text || "").replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "").replace(/\s+/g, " ").trim();
+    var clean = limpiarParaVoz(text).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "").replace(/\s+/g, " ").trim();
     if(!clean) return;
     var u = new SpeechSynthesisUtterance(clean);
     var v = voiceFor(state.pers);
@@ -492,24 +522,68 @@ function speak(text){
 }
 function stopSpeak(){ try{ if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){} }
 
-/* ================= VOZ: MICRÓFONO ================= */
+/* ================= VOZ: MICRÓFONO (DICTADO) =================
+   Para los niños que están aprendiendo a escribir: tocan el micrófono,
+   hablan y sus palabras aparecen escritas en el campo de texto. El mensaje
+   NO se envía solo: queda en el campo y se manda con el botón de enviar,
+   pasando por los mismos filtros que un mensaje tecleado. */
 var recog = null, listening = false;
+var PLACEHOLDER_NORMAL = "Escribe tu mensaje…";
+function finEscuchaUI(){
+  listening = false;
+  $("btn-mic").classList.remove("rec");
+  $("input").placeholder = PLACEHOLDER_NORMAL;
+}
+function detenerEscucha(){
+  if(recog && listening){ try{ recog.stop(); }catch(e){} }
+  finEscuchaUI();
+}
 (function(){
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){ $("btn-mic").style.display = "none"; return; }
   recog = new SR();
-  recog.lang = "es-MX"; recog.interimResults = false; recog.maxAlternatives = 1;
-  recog.onresult = function(ev){
-    var t = ev.results[0][0].transcript || "";
-    if(t){ $("input").value = t; send(); }
+  recog.lang = "es-MX"; recog.interimResults = true; recog.maxAlternatives = 1;
+  var textoPrevio = "", textoFinal = "";
+  recog.onstart = function(){
+    textoPrevio = $("input").value.trim();
+    textoFinal = "";
   };
-  recog.onend = function(){ listening = false; $("btn-mic").classList.remove("rec"); };
-  recog.onerror = function(){ listening = false; $("btn-mic").classList.remove("rec"); };
+  recog.onresult = function(ev){
+    var interim = "";
+    for(var i = ev.resultIndex; i < ev.results.length; i++){
+      if(ev.results[i].isFinal) textoFinal += ev.results[i][0].transcript;
+      else interim += ev.results[i][0].transcript;
+    }
+    var partes = [];
+    if(textoPrevio) partes.push(textoPrevio);
+    if(textoFinal.trim()) partes.push(textoFinal.trim());
+    if(interim.trim()) partes.push(interim.trim());
+    $("input").value = partes.join(" ");
+  };
+  recog.onend = finEscuchaUI;
+  recog.onerror = function(ev){
+    finEscuchaUI();
+    if(!ev) return;
+    if(ev.error === "not-allowed" || ev.error === "service-not-allowed"){
+      addMsg("sys", "🎤 No pude usar el micrófono. Mamá o papá: revisen que el navegador tenga permiso para usarlo y vuelvan a intentarlo.");
+    } else if(ev.error === "audio-capture"){
+      addMsg("sys", "🎤 No encontré un micrófono en este dispositivo. Pueden escribir el mensaje con el teclado.");
+    } else if(ev.error === "network"){
+      addMsg("sys", "🎤 El dictado por voz necesita internet. Revisen la conexión e inténtenlo de nuevo.");
+    }
+    /* "no-speech" y "aborted" son normales (silencio o segundo toque): sin mensaje. */
+  };
 })();
 $("btn-mic").onclick = function(){
   if(!recog) return;
-  if(listening){ try{ recog.stop(); }catch(e){} return; }
-  try{ recog.start(); listening = true; $("btn-mic").classList.add("rec"); }catch(e){}
+  if(listening){ detenerEscucha(); return; }
+  stopSpeak(); /* que el micrófono no escuche la voz del tutor */
+  try{
+    recog.start();
+    listening = true;
+    $("btn-mic").classList.add("rec");
+    $("input").placeholder = "Escuchando… habla ahora 🎤";
+  }catch(e){ finEscuchaUI(); }
 };
 
 /* ================= MENSAJES ================= */
@@ -783,10 +857,10 @@ $("btn-profile").onclick = function(){
 };
 $("btn-send").onclick = send;
 $("input").addEventListener("keydown", function(e){ if(e.key === "Enter") send(); });
-$("btn-change-pers").onclick = function(){ stopSpeak(); buildGrid(); show("screen-pick"); };
+$("btn-change-pers").onclick = function(){ stopSpeak(); detenerEscucha(); buildGrid(); show("screen-pick"); };
 $("btn-autoread").onclick = toggleAutoread;
 $("btn-autoread-2").onclick = toggleAutoread;
-function openParents(){ openGate(function(){ show("screen-parents"); }); }
+function openParents(){ detenerEscucha(); openGate(function(){ show("screen-parents"); }); }
 $("btn-parents-1").onclick = openParents;
 $("btn-parents-2").onclick = openParents;
 $("btn-parents-back").onclick = function(){ buildGrid(); show("screen-pick"); };
