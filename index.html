@@ -94,6 +94,20 @@
   .songrow .ic{font-size:1.7rem;}
   .songrow.pronto{opacity:.55; cursor:default;}
   .songrow.sonando{background:#FFF3D6; border-color:#E8A33D;}
+  .panelx{position:fixed; inset:0; background:rgba(61,52,40,.55); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px;}
+  .panelx .box{background:#fff; border-radius:22px; padding:20px; max-width:400px; width:100%; text-align:center; max-height:92dvh; overflow:auto;}
+  #lienzo{width:100%; aspect-ratio:1/1; background:#fff; border:2px solid var(--borde); border-radius:14px; touch-action:none;}
+  #paleta{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0;}
+  .color-dot{width:38px; height:38px; border-radius:50%; border:3px solid #fff; box-shadow:0 0 0 2px var(--borde); cursor:pointer; padding:0;}
+  .color-dot.sel{box-shadow:0 0 0 3px #3D3428;}
+  .fila-btns{display:flex; gap:8px; justify-content:center; margin-top:10px; flex-wrap:wrap;}
+  #numi-problema{font-size:2.4rem; font-weight:900; margin:10px 0;}
+  #numi-estrellas,#chema-estrellas{font-size:1.2rem; font-weight:900;}
+  .opbtn{display:block; width:100%; margin:8px 0; padding:14px; border:2px solid var(--borde); border-radius:16px; background:#FFFDF7; font-family:inherit; font-size:1.4rem; font-weight:900; cursor:pointer; color:inherit;}
+  .opbtn:active{transform:scale(.97);}
+  #chema-cara{font-size:3.4rem;}
+  #chema-orden{font-size:1.25rem; font-weight:800; min-height:2.2em;}
+  .actbtn{display:inline-block; margin:6px; padding:14px 16px; border:2px solid var(--borde); border-radius:16px; background:#FFFDF7; font-family:inherit; font-size:1.05rem; font-weight:800; cursor:pointer; color:inherit;}
   .chat-tools{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
   .toolbtn{flex:1; padding:11px; border-radius:14px; border:2px solid var(--borde); background:#fff; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:.98rem; cursor:pointer; min-width:130px;}
   .toolbtn.on{border-color:var(--acc); background:#EAFaf7;}
@@ -222,6 +236,7 @@
       <button class="iconbtn" id="btn-send" title="Enviar">➤</button>
     </div>
     <div class="chat-tools">
+      <button class="toolbtn hidden" id="btn-actividad"></button>
       <button class="toolbtn" id="btn-autoread">🔊 Leer en voz alta: sí</button>
       <button class="toolbtn" id="btn-change-pers">🔀 Cambiar de acompañante digital</button>
       <button class="toolbtn" id="btn-parents-2">🔒 Zona de padres</button>
@@ -245,6 +260,44 @@
   </section>
 
   <p class="foot">Ju-bits Kids · Acompañantes digitales para primaria con inteligencias múltiples<br>«Hacer siempre y en todo lo mejor»</p>
+</div>
+
+<div id="panel-dibujo" class="panelx hidden">
+  <div class="box">
+    <p><strong>🎨 Pizarrón de Cromi</strong><br>Dibuja lo que quieras con tu dedo.</p>
+    <canvas id="lienzo" width="640" height="640"></canvas>
+    <div id="paleta"></div>
+    <div class="fila-btns">
+      <button class="btn alt" id="btn-borrar-dibujo">🧽 Limpiar</button>
+      <button class="btn" id="btn-cerrar-dibujo">Listo</button>
+    </div>
+  </div>
+</div>
+
+<div id="panel-numi" class="panelx hidden">
+  <div class="box">
+    <p><strong>🔢 Juego de operaciones de Numi</strong></p>
+    <div id="numi-estrellas">⭐ 0</div>
+    <div id="numi-problema">3 + 4 = ?</div>
+    <div id="numi-opciones"></div>
+    <p id="numi-feedback"></p>
+    <button class="btn" id="btn-cerrar-numi">Cerrar</button>
+  </div>
+</div>
+
+<div id="panel-chema" class="panelx hidden">
+  <div class="box">
+    <p><strong>🤸 Chema dice</strong></p>
+    <div id="chema-cara">🦅</div>
+    <p id="chema-orden">Toca «¡A jugar!» y escucha bien: solo obedece cuando diga «Chema dice».</p>
+    <div id="chema-acciones"></div>
+    <p id="chema-feedback"></p>
+    <div id="chema-estrellas">⭐ 0</div>
+    <div class="fila-btns">
+      <button class="btn alt" id="btn-chema-jugar">▶ ¡A jugar!</button>
+      <button class="btn" id="btn-cerrar-chema">Cerrar</button>
+    </div>
+  </div>
 </div>
 
 <div id="panel-canciones" class="hidden">
@@ -493,6 +546,7 @@ function pickPers(k){
   var g = greeting(k, state.profile ? state.profile.name : "amigo") + " " + GUIA_EMOJIS;
   addMsg("bot", g, true);
   if(state.autoread) speak(g);
+  actualizarActividad();
   $("input").focus();
 }
 
@@ -673,6 +727,150 @@ $("btn-cancion").onclick = function(){ stopSpeak(); abrirCanciones(); };
 $("btn-canciones-cerrar").onclick = function(){ cerrarCanciones(); };
 var acEl = $("audio-cancion");
 if(acEl){ acEl.onplay = marcarSonando; acEl.onpause = marcarSonando; acEl.onended = marcarSonando; }
+
+/* ================= ACTIVIDADES POR ACOMPAÑANTE =================
+   Cromi: pizarrón de dibujo libre. Numi: juego de operaciones.
+   Brini: «Chema dice». El botón de actividad aparece en el chat solo
+   con ese acompañante (actualizarActividad se llama desde pickPers). */
+function abrirPanel(id){ $(id).classList.remove("hidden"); }
+function cerrarPanel(id){ $(id).classList.add("hidden"); }
+function actualizarActividad(){
+  var b = $("btn-actividad");
+  if(!b) return;
+  var k = state.pers;
+  if(k === "cromi"){ b.textContent = "🎨 Pizarrón de Cromi"; b.classList.remove("hidden"); }
+  else if(k === "numi"){ b.textContent = "🔢 Juego de operaciones"; b.classList.remove("hidden"); }
+  else if(k === "brini"){ b.textContent = "🤸 Chema dice"; b.classList.remove("hidden"); }
+  else b.classList.add("hidden");
+}
+$("btn-actividad").onclick = function(){
+  stopSpeak();
+  if(state.pers === "cromi") abrirPanel("panel-dibujo");
+  else if(state.pers === "numi"){ nuevaOperacion(); abrirPanel("panel-numi"); }
+  else if(state.pers === "brini") abrirPanel("panel-chema");
+};
+
+/* ---------- Pizarrón de Cromi ---------- */
+var dibujo = { color: "#E4572E", grosor: 10, pintando: false };
+(function(){
+  var colores = ["#E4572E", "#F2B705", "#3E9B4F", "#2E7FA8", "#8E6CC8", "#E86AA8", "#3D3428", "#FFFFFF"];
+  var pal = $("paleta");
+  colores.forEach(function(c, i){
+    var d = document.createElement("button");
+    d.className = "color-dot" + (i === 0 ? " sel" : "");
+    d.style.background = c;
+    d.setAttribute("aria-label", "Color");
+    d.onclick = function(){
+      dibujo.color = c;
+      var dots = pal.querySelectorAll(".color-dot");
+      for(var j = 0; j < dots.length; j++) dots[j].classList.remove("sel");
+      d.classList.add("sel");
+    };
+    pal.appendChild(d);
+  });
+  var cv = $("lienzo"), ctx = cv.getContext("2d");
+  ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+  function posDibujo(e){
+    var r = cv.getBoundingClientRect();
+    return { x: (e.clientX - r.left) * cv.width / r.width, y: (e.clientY - r.top) * cv.height / r.height };
+  }
+  cv.addEventListener("pointerdown", function(e){
+    e.preventDefault();
+    dibujo.pintando = true;
+    var p = posDibujo(e);
+    ctx.strokeStyle = dibujo.color; ctx.lineWidth = dibujo.grosor;
+    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + 0.1, p.y + 0.1); ctx.stroke();
+  });
+  cv.addEventListener("pointermove", function(e){
+    if(!dibujo.pintando) return;
+    var p = posDibujo(e);
+    ctx.lineTo(p.x, p.y); ctx.stroke();
+  });
+  window.addEventListener("pointerup", function(){ dibujo.pintando = false; });
+  $("btn-borrar-dibujo").onclick = function(){ ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, cv.width, cv.height); };
+  $("btn-cerrar-dibujo").onclick = function(){ cerrarPanel("panel-dibujo"); };
+})();
+
+/* ---------- Juego de operaciones de Numi ---------- */
+var numi = { puntos: 0, respuesta: 0 };
+function nuevaOperacion(){
+  var max = numi.puntos >= 5 ? 20 : 10;
+  var resta = numi.puntos >= 3 && Math.random() < 0.4;
+  var a = Math.floor(Math.random() * max) + 1, b = Math.floor(Math.random() * max) + 1;
+  var txt, r;
+  if(resta){ if(b > a){ var t = a; a = b; b = t; } r = a - b; txt = a + " − " + b + " = ?"; }
+  else { r = a + b; txt = a + " + " + b + " = ?"; }
+  numi.respuesta = r;
+  $("numi-problema").textContent = txt;
+  $("numi-feedback").textContent = "";
+  var ops = [r];
+  while(ops.length < 3){
+    var c = r + [-2, -1, 1, 2, 10][Math.floor(Math.random() * 5)];
+    if(c >= 0 && ops.indexOf(c) < 0) ops.push(c);
+  }
+  ops.sort(function(){ return Math.random() - 0.5; });
+  var cont = $("numi-opciones"); cont.innerHTML = "";
+  ops.forEach(function(o){
+    var btn = document.createElement("button");
+    btn.className = "opbtn"; btn.textContent = o;
+    btn.onclick = function(){
+      if(o === numi.respuesta){
+        numi.puntos++;
+        $("numi-estrellas").textContent = "⭐ " + numi.puntos;
+        $("numi-feedback").textContent = "¡Muy bien! 🎉";
+        setTimeout(nuevaOperacion, 900);
+      } else {
+        $("numi-feedback").textContent = "Casi… inténtalo otra vez. 💪";
+      }
+    };
+    cont.appendChild(btn);
+  });
+}
+$("btn-cerrar-numi").onclick = function(){ cerrarPanel("panel-numi"); };
+
+/* ---------- Chema dice (con Brini) ---------- */
+var chema = { puntos: 0, accion: null, conOrden: false, esperando: false };
+var CHEMA_ACCIONES = [
+  { id: "salta", texto: "¡Salta!", btn: "🦘 Saltar" },
+  { id: "aplaude", texto: "¡Aplaude!", btn: "👏 Aplaudir" },
+  { id: "gira", texto: "¡Da una vuelta!", btn: "🌀 Girar" },
+  { id: "estatua", texto: "¡Estatua!", btn: "🗿 Estatua" }
+];
+function chemaNuevaOrden(){
+  var ac = CHEMA_ACCIONES[Math.floor(Math.random() * CHEMA_ACCIONES.length)];
+  chema.accion = ac.id;
+  chema.conOrden = Math.random() < 0.65;
+  chema.esperando = true;
+  $("chema-orden").textContent = (chema.conOrden ? "Chema dice: " : "") + ac.texto;
+  $("chema-feedback").textContent = "";
+  var cont = $("chema-acciones"); cont.innerHTML = "";
+  CHEMA_ACCIONES.forEach(function(a2){
+    var btn = document.createElement("button");
+    btn.className = "actbtn"; btn.textContent = a2.btn;
+    btn.onclick = function(){ chemaResponder(a2.id); };
+    cont.appendChild(btn);
+  });
+  var nm = document.createElement("button");
+  nm.className = "actbtn"; nm.textContent = "🧍 ¡No me muevo!";
+  nm.onclick = function(){ chemaResponder("quieto"); };
+  cont.appendChild(nm);
+}
+function chemaResponder(id){
+  if(!chema.esperando) return;
+  var bien = chema.conOrden ? (id === chema.accion) : (id === "quieto");
+  chema.esperando = false;
+  if(bien){
+    chema.puntos++;
+    $("chema-estrellas").textContent = "⭐ " + chema.puntos;
+    $("chema-feedback").textContent = "¡Eso! 🎉";
+  } else {
+    $("chema-feedback").textContent = chema.conOrden ? "¡Uy! Chema sí lo había pedido. Otra vez 💪" : "¡Trampa! Chema no dijo «Chema dice» 🙊";
+  }
+  setTimeout(chemaNuevaOrden, 1400);
+}
+$("btn-chema-jugar").onclick = function(){ chemaNuevaOrden(); };
+$("btn-cerrar-chema").onclick = function(){ cerrarPanel("panel-chema"); };
 
 /* ================= VOZ: MICRÓFONO (DICTADO) =================
    Para los niños que están aprendiendo a escribir: tocan el micrófono,
