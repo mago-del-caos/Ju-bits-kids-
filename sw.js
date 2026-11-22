@@ -1,6 +1,6 @@
 /* Ju-bits Kids — service worker: la app se abre sin conexión tras la primera visita.
    Las llamadas a las API de IA (Groq/Gemini) siempre van a la red. */
-const CACHE = "jubits-kids-v15";
+const CACHE = "jubits-kids-v16";
 const ASSETS = [
   "./",
   "./index.html",

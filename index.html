@@ -327,7 +327,6 @@
 <div id="panel-lira" class="panelx hidden">
   <div class="box">
     <p><strong>🎵 Sigue el ritmo con Lira</strong><br>Escucha los sonidos y repítelos en el mismo orden.</p>
-    <button id="btn-lira-cancion" class="songbtn">🎵 La canción de los Ju-bits Kids ▶</button>
     <div id="lira-estrellas">⭐ 0</div>
     <div id="lira-pads">
       <button class="lira-pad" data-n="0" style="background:#F6C6DA;">🔔</button>
@@ -340,6 +339,7 @@
       <button class="btn alt" id="btn-lira-jugar">▶ ¡A jugar!</button>
       <button class="btn" id="btn-cerrar-lira">Cerrar</button>
     </div>
+    <button id="btn-lira-cancion" class="songbtn">🎵 Escuchar nuestra canción ▶</button>
   </div>
 </div>
 
@@ -841,8 +841,8 @@ function actualizarBtnLira(){
   var a = $("audio-cancion"), b = $("btn-lira-cancion");
   if(!a || !b) return;
   b.textContent = (a.paused || cancionActual !== "grupo")
-    ? "🎵 La canción de los Ju-bits Kids ▶"
-    : "🎵 La canción de los Ju-bits Kids ⏸";
+    ? "🎵 Escuchar nuestra canción ▶"
+    : "🎵 Escuchar nuestra canción ⏸";
 }
 if(acEl){
   var alCambiarAudio = function(){ marcarSonando(); actualizarBtnLira(); };
