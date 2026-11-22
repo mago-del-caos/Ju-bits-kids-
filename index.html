@@ -88,6 +88,12 @@
     background:linear-gradient(135deg,#8E6CC8,#E86AA8); color:#fff; font-family:inherit; font-size:1.15rem;
     font-weight:900; cursor:pointer; box-shadow:0 4px 14px rgba(142,108,200,.35);}
   .songbtn:active{transform:scale(.98);}
+  #panel-canciones{position:fixed; inset:0; background:rgba(61,52,40,.55); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px;}
+  #panel-canciones .box{background:#fff; border-radius:22px; padding:24px; max-width:380px; width:100%; text-align:center;}
+  .songrow{display:flex; align-items:center; gap:10px; width:100%; margin:8px 0; padding:14px; border:2px solid var(--borde); border-radius:16px; background:#FFFDF7; font-family:inherit; font-size:1.05rem; font-weight:800; cursor:pointer; text-align:left; color:inherit;}
+  .songrow .ic{font-size:1.7rem;}
+  .songrow.pronto{opacity:.55; cursor:default;}
+  .songrow.sonando{background:#FFF3D6; border-color:#E8A33D;}
   .chat-tools{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
   .toolbtn{flex:1; padding:11px; border-radius:14px; border:2px solid var(--borde); background:#fff; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:.98rem; cursor:pointer; min-width:130px;}
   .toolbtn.on{border-color:var(--acc); background:#EAFaf7;}
@@ -186,7 +192,7 @@
       <strong style="font-size:1.15rem;">Elige a tu acompañante digital de hoy 👇</strong>
       <button class="btn alt small" id="btn-parents-1">🔒 Zona de padres</button>
     </div>
-    <button id="btn-cancion" class="songbtn">🎵 ¡La canción de los Ju-bits Kids! ▶</button>
+    <button id="btn-cancion" class="songbtn">🎵 Canciones de los Ju-bits Kids 🎶</button>
     <div id="pers-grid"></div>
     <p class="foot">Cada acompañante digital fortalece una inteligencia. ¡Puedes cambiar de acompañante digital cuando quieras y probar con todos!</p>
   </section>
@@ -239,6 +245,15 @@
   </section>
 
   <p class="foot">Ju-bits Kids · Acompañantes digitales para primaria con inteligencias múltiples<br>«Hacer siempre y en todo lo mejor»</p>
+</div>
+
+<div id="panel-canciones" class="hidden">
+  <div class="box">
+    <div style="font-size:2rem;">🎵</div>
+    <p><strong>¿Qué canción quieres escuchar?</strong></p>
+    <div id="lista-canciones"></div>
+    <button class="btn alt" id="btn-canciones-cerrar">Cerrar</button>
+  </div>
 </div>
 
 <audio id="audio-cancion" src="cancion-jubits-kids.mp3" preload="none"></audio>
@@ -592,12 +607,12 @@ function speak(text){
 }
 function stopSpeak(){ try{ if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){} }
 
-/* ================= CANCIÓN DE LOS JU-BITS KIDS =================
-   La canción oficial vive en el archivo cancion-jubits-kids.mp3, junto a
-   la app. Se toca con el botón grande de la pantalla de acompañantes o
-   cuando el niño la pide en el chat (botón 🎵, voz o texto): send() la
-   detecta con esPeticionCancion() DESPUÉS del filtro de entrada y la
-   reproduce sin pasar por la IA. */
+/* ================= CANCIONES DE LOS JU-BITS KIDS =================
+   Las canciones viven como MP3 junto a la app. El botón grande de la
+   pantalla de acompañantes abre el panel para ELEGIR canción; también
+   se abre cuando el niño la pide en el chat (botón 🎵, voz o texto):
+   send() lo detecta con esPeticionCancion() DESPUÉS del filtro de
+   entrada y sin pasar por la IA. */
 function esPeticionCancion(t){
   var s = t.toLowerCase();
   if(s.indexOf("🎵") >= 0) return true;
@@ -605,21 +620,59 @@ function esPeticionCancion(t){
   var ganas = /quiero|pon|escuch|toca|reproduc|otra vez|de nuevo/.test(s);
   return tema && ganas;
 }
-function actualizarBtnCancion(){
-  var a = $("audio-cancion"), b = $("btn-cancion");
-  if(!a || !b) return;
-  b.textContent = a.paused ? "🎵 ¡La canción de los Ju-bits Kids! ▶" : "🎵 La canción de los Ju-bits Kids ⏸ ¡Toca para parar!";
+/* Biblioteca de canciones: al tocar la nota musical (el botón grande o
+   pedirla en el chat) se abre el panel y el niño ELIGE cuál escuchar.
+   Para activar una canción marcada "pronto": basta subir su MP3 con el
+   nombre exacto de "archivo" y quitarle la marca pronto:true. */
+var CANCIONES = [
+  { id: "grupo", icono: "🎉", titulo: "La canción de los Ju-bits Kids", archivo: "cancion-jubits-kids.mp3" },
+  { id: "numeros", icono: "🔢", titulo: "Contando con Numi", archivo: "cancion-numeros.mp3", pronto: true },
+  { id: "emociones", icono: "💜", titulo: "Mis emociones con Inti", archivo: "cancion-emociones.mp3", pronto: true },
+  { id: "cuerpo", icono: "🤸", titulo: "A mover el cuerpo con Brini", archivo: "cancion-cuerpo.mp3", pronto: true }
+];
+var cancionActual = null;
+function construirCanciones(){
+  var cont = $("lista-canciones");
+  if(!cont) return;
+  cont.innerHTML = "";
+  CANCIONES.forEach(function(c){
+    var b = document.createElement("button");
+    b.className = "songrow" + (c.pronto ? " pronto" : "");
+    b.id = "song-" + c.id;
+    var ic = document.createElement("span"); ic.className = "ic"; ic.textContent = c.icono;
+    var tx = document.createElement("span"); tx.textContent = c.titulo + (c.pronto ? " · Muy pronto 🎧" : "");
+    b.appendChild(ic); b.appendChild(tx);
+    if(!c.pronto){ b.onclick = function(){ elegirCancion(c); }; }
+    cont.appendChild(b);
+  });
 }
-function tocarCancion(){
+function marcarSonando(){
+  var a = $("audio-cancion");
+  CANCIONES.forEach(function(c){
+    var b = $("song-" + c.id);
+    if(b) b.classList.toggle("sonando", cancionActual === c.id && a && !a.paused);
+  });
+}
+function elegirCancion(c){
   var a = $("audio-cancion");
   if(!a) return;
-  if(a.paused){ var p = a.play(); if(p && p.catch) p.catch(function(){}); }
-  else a.pause();
-  actualizarBtnCancion();
+  stopSpeak();
+  if(cancionActual === c.id){
+    if(a.paused){ var p = a.play(); if(p && p.catch) p.catch(function(){}); }
+    else a.pause();
+  } else {
+    cancionActual = c.id;
+    a.src = c.archivo;
+    var p2 = a.play(); if(p2 && p2.catch) p2.catch(function(){});
+  }
+  marcarSonando();
 }
-$("btn-cancion").onclick = function(){ stopSpeak(); tocarCancion(); };
+function abrirCanciones(){ construirCanciones(); marcarSonando(); $("panel-canciones").classList.remove("hidden"); }
+function cerrarCanciones(){ $("panel-canciones").classList.add("hidden"); }
+$("btn-cancion").onclick = function(){ stopSpeak(); abrirCanciones(); };
+$("btn-canciones-cerrar").onclick = function(){ cerrarCanciones(); };
 var acEl = $("audio-cancion");
-if(acEl){ acEl.onplay = actualizarBtnCancion; acEl.onpause = actualizarBtnCancion; acEl.onended = actualizarBtnCancion; }
+if(acEl){ acEl.onplay = marcarSonando; acEl.onpause = marcarSonando; acEl.onended = marcarSonando; }
 
 /* ================= VOZ: MICRÓFONO (DICTADO) =================
    Para los niños que están aprendiendo a escribir: tocan el micrófono,
@@ -886,10 +939,10 @@ async function send(){
   }
   if(esPeticionCancion(text)){
     state.history.push({ role: "user", content: text });
-    tocarCancion();
-    var respC = "🎵 ¡A cantar! Esta es la canción de los Ju-bits Kids. 🎶";
+    var respC = "🎵 ¡A cantar! Toca la canción que quieras escuchar. 🎶";
     state.history.push({ role: "assistant", content: respC });
     addMsg("bot", respC);
+    abrirCanciones();
     return;
   }
   state.history.push({ role: "user", content: text });
