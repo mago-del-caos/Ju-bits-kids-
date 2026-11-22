@@ -116,6 +116,10 @@
   #inti-circulo{width:130px; height:130px; border-radius:50%; background:radial-gradient(circle at 35% 35%, #D9C8F5, #8E6CC8); margin:14px auto; transition:transform 4s ease-in-out;}
   #inti-circulo.grande{transform:scale(1.45);}
   #inti-texto{font-size:1.25rem; font-weight:800; min-height:1.6em;}
+  .ami-cara{display:inline-flex; flex-direction:column; align-items:center; gap:2px; margin:5px; padding:10px 12px; border:2px solid var(--borde); border-radius:16px; background:#FFFDF7; font-family:inherit; font-weight:800; cursor:pointer; color:inherit;}
+  .ami-cara .cara{font-size:2.6rem; line-height:1.1;}
+  .ami-cara.sel{outline:4px solid #E86A92; background:#FDECEF;}
+  #ami-frase{font-size:1.15rem; font-weight:800; min-height:2.4em; line-height:1.35;}
   .chat-tools{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
   .toolbtn{flex:1; padding:11px; border-radius:14px; border:2px solid var(--borde); background:#fff; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:.98rem; cursor:pointer; min-width:130px;}
   .toolbtn.on{border-color:var(--acc); background:#EAFaf7;}
@@ -341,12 +345,13 @@
 
 <div id="panel-ami" class="panelx hidden">
   <div class="box">
-    <p><strong>💗 ¿Cómo se siente? — con Ami</strong></p>
-    <div id="ami-estrellas">⭐ 0</div>
-    <div id="ami-pregunta" class="pregunta-juego cara-grande"></div>
-    <div id="ami-opciones"></div>
-    <p id="ami-feedback"></p>
-    <button class="btn" id="btn-cerrar-ami">Cerrar</button>
+    <p><strong>💗 ¿Cómo te sientes hoy?</strong><br>Ami te lo pregunta con su voz. Toca la carita que se parece a ti.</p>
+    <div id="ami-caras"></div>
+    <p id="ami-frase"></p>
+    <div class="fila-btns">
+      <button class="btn alt" id="btn-ami-oir">🔊 Escuchar la pregunta</button>
+      <button class="btn" id="btn-cerrar-ami">Cerrar</button>
+    </div>
   </div>
 </div>
 
@@ -861,7 +866,7 @@ $("btn-actividad").onclick = function(){
   else if(k === "brini") abrirPanel("panel-chema");
   else if(k === "vera"){ juegoVera.mostrar(); abrirPanel("panel-vera"); }
   else if(k === "lira") abrirPanel("panel-lira");
-  else if(k === "ami"){ juegoAmi.mostrar(); abrirPanel("panel-ami"); }
+  else if(k === "ami"){ abrirPanel("panel-ami"); amiPreguntar(); }
   else if(k === "inti") abrirPanel("panel-inti");
   else if(k === "nati"){ juegoNati.mostrar(); abrirPanel("panel-nati"); }
   else if(k === "coni"){ juegoConi.mostrar(); abrirPanel("panel-coni"); }
@@ -998,7 +1003,7 @@ $("btn-guardar-dibujo").onclick = function(){
 };
 $("btn-cerrar-guardar").onclick = function(){ cerrarPanel("panel-guardar"); };
 
-/* ---------- Motor simple de preguntas (Vera, Ami, Nati, Coni) ---------- */
+/* ---------- Motor simple de preguntas (Vera, Nati, Coni) ---------- */
 function quizJuego(prefijo, rondas){
   var st = { i: 0, puntos: 0 };
   function mostrar(){
@@ -1037,14 +1042,35 @@ var juegoVera = quizJuego("vera", [
   { q: "¿Qué letra falta?  P _ Z", ops: ["E", "A", "O"], ok: 0 },
   { q: "¿Qué letra falta?  M E S _", ops: ["A", "O", "U"], ok: 0 }
 ]);
-var juegoAmi = quizJuego("ami", [
-  { q: "😀", ops: ["Feliz", "Triste", "Enojado"], ok: 0 },
-  { q: "😢", ops: ["Triste", "Feliz", "Dormido"], ok: 0 },
-  { q: "😠", ops: ["Enojado", "Feliz", "Sorprendido"], ok: 0 },
-  { q: "😨", ops: ["Con miedo", "Feliz", "Triste"], ok: 0 },
-  { q: "😴", ops: ["Dormido", "Enojado", "Feliz"], ok: 0 },
-  { q: "🤩", ops: ["Emocionado", "Triste", "Con miedo"], ok: 0 }
-]);
+/* ---------- Ami pregunta con su voz: ¿Cómo te sientes hoy? ---------- */
+var EMOCIONES = [
+  { cara: "😀", nombre: "Feliz", frase: "¡Qué alegría! Cuando estás feliz, compártelo con un abrazo y una sonrisa. 😊" },
+  { cara: "😢", nombre: "Triste", frase: "Está bien sentirse triste a veces. Respira despacito y cuéntale a alguien que te quiere. 💗" },
+  { cara: "😠", nombre: "Enojado", frase: "Cuando estamos enojados, respiramos profundo y contamos hasta diez. Tú puedes. 🌈" },
+  { cara: "😨", nombre: "Con miedo", frase: "Tener miedo es normal. Busca a un adulto de confianza y cuéntale cómo te sientes. 🤲" },
+  { cara: "😴", nombre: "Cansado", frase: "Tu cuerpo te pide descanso. Un ratito de calma te hará sentir mucho mejor. 🌙" },
+  { cara: "🤩", nombre: "Emocionado", frase: "¡Qué emoción! Disfrútala mucho y cuéntasela a tus amigos. ✨" }
+];
+function amiPreguntar(){
+  speak("¿Cómo te sientes hoy? Toca la carita que se parece a ti.", state.voice);
+}
+(function(){
+  var cont = $("ami-caras");
+  EMOCIONES.forEach(function(e){
+    var b = document.createElement("button");
+    b.className = "ami-cara";
+    b.innerHTML = "<span class='cara'>" + e.cara + "</span><span>" + e.nombre + "</span>";
+    b.onclick = function(){
+      var todas = document.querySelectorAll(".ami-cara");
+      for(var i = 0; i < todas.length; i++) todas[i].classList.remove("sel");
+      b.classList.add("sel");
+      $("ami-frase").textContent = e.frase;
+      speak(e.frase, state.voice);
+    };
+    cont.appendChild(b);
+  });
+})();
+$("btn-ami-oir").onclick = function(){ amiPreguntar(); };
 var juegoNati = quizJuego("nati", [
   { q: "Tengo una trompa muy larga y orejas enormes. ¿Quién soy?", ops: ["🐘 Elefante", "🦒 Jirafa", "🐶 Perro"], ok: 0 },
   { q: "Duermo colgado boca abajo y vuelo de noche. ¿Quién soy?", ops: ["🦇 Murciélago", "🦉 Búho", "🐝 Abeja"], ok: 0 },
