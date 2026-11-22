@@ -1,12 +1,12 @@
 # Ju-bits Kids 🧒
 
-Tutores con inteligencia artificial para niños de **primaria**, basados en la teoría de las **inteligencias múltiples** de Howard Gardner. Es la versión infantil de [Ju-bits](https://mago-del-caos.github.io/Ju-bits/) (para preparatoria).
+Acompañantes digitales con inteligencia artificial para niños de **primaria**, basados en la teoría de las **inteligencias múltiples** de Howard Gardner. Es la versión infantil de [Ju-bits](https://mago-del-caos.github.io/Ju-bits/) (para preparatoria).
 
-**Pensada para usarse en familia:** la configuración la hace mamá, papá o el tutor; el niño solo elige tutor y platica.
+**Pensada para usarse en familia:** la configuración la hace mamá, papá o el tutor; el niño solo elige acompañante digital y platica.
 
-## Los tutores
+## Los acompañantes digitales
 
-| Tutor | Inteligencia | Su estilo |
+| Acompañante digital | Inteligencia | Su estilo |
 |---|---|---|
 | **Vera** | Lingüística | Cuentos, rimas, trabalenguas y lectura |
 | **Numi** | Lógico-matemática | Números, patrones y acertijos |
@@ -16,7 +16,7 @@ Tutores con inteligencia artificial para niños de **primaria**, basados en la t
 | **Ami** | Interpersonal | Amistad, empatía y convivencia |
 | **Inti** | Intrapersonal | Emociones, calma y respiración |
 | **Nati** | Naturalista | Plantas, animales y cuidado del planeta |
-| **Coni** | Pensamiento en red (holístico) | Conecta todas las ideas y a todos los tutores |
+| **Coni** | Pensamiento en red (holístico) | Conecta todas las ideas y a todos los acompañantes digitales |
 
 ## Cómo funciona
 
@@ -38,4 +38,3 @@ Tutores con inteligencia artificial para niños de **primaria**, basados en la t
 Una sola página (`index.html`), sin servidor: llama directamente a las APIs de Groq y Gemini desde el navegador, con descubrimiento dinámico de modelos y cascada de respaldo (hasta 4 modelos). Voz con Web Speech API (`speechSynthesis` + `SpeechRecognition` en español de México).
 
 Hecho con la Filosofía Josefina: «Hacer siempre y en todo lo mejor».
-
