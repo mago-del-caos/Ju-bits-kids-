@@ -375,7 +375,10 @@
     <div id="nati-pregunta" class="pregunta-juego"></div>
     <div id="nati-opciones"></div>
     <p id="nati-feedback"></p>
-    <button class="btn" id="btn-cerrar-nati">Cerrar</button>
+    <div class="fila-btns">
+      <button class="btn alt" id="btn-nati-oir">🔊 Escuchar la pista</button>
+      <button class="btn" id="btn-cerrar-nati">Cerrar</button>
+    </div>
   </div>
 </div>
 
@@ -868,7 +871,13 @@ $("btn-actividad").onclick = function(){
   else if(k === "lira") abrirPanel("panel-lira");
   else if(k === "ami"){ abrirPanel("panel-ami"); amiPreguntar(); }
   else if(k === "inti") abrirPanel("panel-inti");
-  else if(k === "nati"){ juegoNati.mostrar(); abrirPanel("panel-nati"); }
+  else if(k === "nati"){
+    natiSuprimir = true;
+    juegoNati.mostrar();
+    abrirPanel("panel-nati");
+    natiSuprimir = false;
+    speak("Escucha la pista y adivina qué animal soy. " + juegoNati.actual().q);
+  }
   else if(k === "coni"){ juegoConi.mostrar(); abrirPanel("panel-coni"); }
 };
 
@@ -1004,12 +1013,13 @@ $("btn-guardar-dibujo").onclick = function(){
 $("btn-cerrar-guardar").onclick = function(){ cerrarPanel("panel-guardar"); };
 
 /* ---------- Motor simple de preguntas (Vera, Nati, Coni) ---------- */
-function quizJuego(prefijo, rondas){
+function quizJuego(prefijo, rondas, alMostrar){
   var st = { i: 0, puntos: 0 };
   function mostrar(){
     var r = rondas[st.i % rondas.length];
     $(prefijo + "-pregunta").textContent = r.q;
     $(prefijo + "-feedback").textContent = "";
+    if(alMostrar) alMostrar(r);
     var cont = $(prefijo + "-opciones"); cont.innerHTML = "";
     var orden = r.ops.map(function(o, idx){ return { t: o, buena: idx === r.ok }; });
     orden.sort(function(){ return Math.random() - 0.5; });
@@ -1030,7 +1040,10 @@ function quizJuego(prefijo, rondas){
       cont.appendChild(b);
     });
   }
-  return { mostrar: mostrar };
+  return {
+    mostrar: mostrar,
+    actual: function(){ return rondas[st.i % rondas.length]; }
+  };
 }
 var juegoVera = quizJuego("vera", [
   { q: "¿Qué letra falta?  C _ S A", ops: ["A", "E", "O"], ok: 0 },
@@ -1071,6 +1084,7 @@ function amiPreguntar(){
   });
 })();
 $("btn-ami-oir").onclick = function(){ amiPreguntar(); };
+var natiSuprimir = false;
 var juegoNati = quizJuego("nati", [
   { q: "Tengo una trompa muy larga y orejas enormes. ¿Quién soy?", ops: ["🐘 Elefante", "🦒 Jirafa", "🐶 Perro"], ok: 0 },
   { q: "Duermo colgado boca abajo y vuelo de noche. ¿Quién soy?", ops: ["🦇 Murciélago", "🦉 Búho", "🐝 Abeja"], ok: 0 },
@@ -1078,7 +1092,7 @@ var juegoNati = quizJuego("nati", [
   { q: "Salto de rama en rama y me encantan las bananas. ¿Quién soy?", ops: ["🐒 Mono", "🐿️ Ardilla", "🦜 Loro"], ok: 0 },
   { q: "Nado en el mar, salto las olas y soy muy listo. ¿Quién soy?", ops: ["🐬 Delfín", "🦈 Tiburón", "🐢 Tortuga"], ok: 0 },
   { q: "Vivo en el corral, pongo huevos y digo clo-clo. ¿Quién soy?", ops: ["🐔 Gallina", "🦆 Pato", "🐷 Cerdito"], ok: 0 }
-]);
+], function(r){ if(!natiSuprimir) speak(r.q); });
 var juegoConi = quizJuego("coni", [
   { q: "☀️ El sol se conecta con…", ops: ["🌻 Un girasol", "🧦 Un calcetín", "🚗 Un coche"], ok: 0 },
   { q: "🌧️ La lluvia se conecta con…", ops: ["☂️ Un paraguas", "🍕 Una pizza", "🛏️ Una cama"], ok: 0 },
@@ -1090,6 +1104,7 @@ var juegoConi = quizJuego("coni", [
 $("btn-cerrar-vera").onclick = function(){ cerrarPanel("panel-vera"); };
 $("btn-cerrar-ami").onclick = function(){ cerrarPanel("panel-ami"); };
 $("btn-cerrar-nati").onclick = function(){ cerrarPanel("panel-nati"); };
+$("btn-nati-oir").onclick = function(){ speak(juegoNati.actual().q); };
 $("btn-cerrar-coni").onclick = function(){ cerrarPanel("panel-coni"); };
 
 /* ---------- Sigue el ritmo con Lira (memoria de sonidos) ---------- */
