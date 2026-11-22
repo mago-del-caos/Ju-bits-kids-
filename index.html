@@ -323,6 +323,7 @@
 <div id="panel-lira" class="panelx hidden">
   <div class="box">
     <p><strong>🎵 Sigue el ritmo con Lira</strong><br>Escucha los sonidos y repítelos en el mismo orden.</p>
+    <button id="btn-lira-cancion" class="songbtn">🎵 La canción de los Ju-bits Kids ▶</button>
     <div id="lira-estrellas">⭐ 0</div>
     <div id="lira-pads">
       <button class="lira-pad" data-n="0" style="background:#F6C6DA;">🔔</button>
@@ -763,6 +764,11 @@ function stopSpeak(){ try{ if("speechSynthesis" in window) speechSynthesis.cance
    se abre cuando el niño la pide en el chat (botón 🎵, voz o texto):
    send() lo detecta con esPeticionCancion() DESPUÉS del filtro de
    entrada y sin pasar por la IA. */
+/* PAUSA de las canciones extra (Pablo, 22 nov 2026): la biblioteca de
+   canciones está en pausa; la ÚNICA vía para escuchar la canción de los
+   Ju-bits Kids es el botón «¡Mi carisma!» de Lira. Para reactivar la
+   biblioteca, poner esta bandera en true. */
+var CANCIONES_ACTIVAS = false;
 function esPeticionCancion(t){
   var s = t.toLowerCase();
   if(s.indexOf("🎵") >= 0) return true;
@@ -820,9 +826,20 @@ function elegirCancion(c){
 function abrirCanciones(){ construirCanciones(); marcarSonando(); $("panel-canciones").classList.remove("hidden"); }
 function cerrarCanciones(){ $("panel-canciones").classList.add("hidden"); }
 $("btn-cancion").onclick = function(){ stopSpeak(); abrirCanciones(); };
+if(!CANCIONES_ACTIVAS) $("btn-cancion").style.display = "none";
 $("btn-canciones-cerrar").onclick = function(){ cerrarCanciones(); };
 var acEl = $("audio-cancion");
-if(acEl){ acEl.onplay = marcarSonando; acEl.onpause = marcarSonando; acEl.onended = marcarSonando; }
+function actualizarBtnLira(){
+  var a = $("audio-cancion"), b = $("btn-lira-cancion");
+  if(!a || !b) return;
+  b.textContent = (a.paused || cancionActual !== "grupo")
+    ? "🎵 La canción de los Ju-bits Kids ▶"
+    : "🎵 La canción de los Ju-bits Kids ⏸";
+}
+if(acEl){
+  var alCambiarAudio = function(){ marcarSonando(); actualizarBtnLira(); };
+  acEl.onplay = alCambiarAudio; acEl.onpause = alCambiarAudio; acEl.onended = alCambiarAudio;
+}
 
 /* ================= ACTIVIDADES POR ACOMPAÑANTE =================
    Cromi: pizarrón de dibujo libre. Numi: juego de operaciones.
@@ -1080,6 +1097,14 @@ function liraNuevaRonda(){
   lira.seq.push(Math.floor(Math.random() * 4));
   liraTocarSecuencia();
 }
+$("btn-lira-cancion").onclick = function(){
+  var a = $("audio-cancion"); if(!a) return;
+  stopSpeak();
+  if(cancionActual !== "grupo"){ cancionActual = "grupo"; a.src = "cancion-jubits-kids.mp3"; }
+  if(a.paused){ var p = a.play(); if(p && p.catch) p.catch(function(){}); }
+  else a.pause();
+  actualizarBtnLira();
+};
 $("btn-lira-jugar").onclick = function(){
   lira.seq = []; lira.puntos = 0;
   $("lira-estrellas").textContent = "⭐ 0";
@@ -1412,7 +1437,7 @@ async function send(){
     typeMsg(safe, state.autoread);
     return;
   }
-  if(esPeticionCancion(text)){
+  if(CANCIONES_ACTIVAS && esPeticionCancion(text)){
     state.history.push({ role: "user", content: text });
     var respC = "🎵 ¡A cantar! Toca la canción que quieras escuchar. 🎶";
     state.history.push({ role: "assistant", content: respC });
