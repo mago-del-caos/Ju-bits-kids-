@@ -108,6 +108,14 @@
   #chema-cara{font-size:3.4rem;}
   #chema-orden{font-size:1.25rem; font-weight:800; min-height:2.2em;}
   .actbtn{display:inline-block; margin:6px; padding:14px 16px; border:2px solid var(--borde); border-radius:16px; background:#FFFDF7; font-family:inherit; font-size:1.05rem; font-weight:800; cursor:pointer; color:inherit;}
+  .pregunta-juego{font-size:1.35rem; font-weight:900; margin:10px 0; line-height:1.35;}
+  .pregunta-juego.cara-grande{font-size:4rem;}
+  #vera-estrellas,#ami-estrellas,#nati-estrellas,#coni-estrellas,#lira-estrellas{font-size:1.2rem; font-weight:900;}
+  .lira-pad{width:64px; height:64px; margin:5px; border:2px solid var(--borde); border-radius:18px; font-size:1.9rem; cursor:pointer;}
+  .lira-pad.sel{outline:4px solid #E8A33D; transform:scale(1.08);}
+  #inti-circulo{width:130px; height:130px; border-radius:50%; background:radial-gradient(circle at 35% 35%, #D9C8F5, #8E6CC8); margin:14px auto; transition:transform 4s ease-in-out;}
+  #inti-circulo.grande{transform:scale(1.45);}
+  #inti-texto{font-size:1.25rem; font-weight:800; min-height:1.6em;}
   .chat-tools{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
   .toolbtn{flex:1; padding:11px; border-radius:14px; border:2px solid var(--borde); background:#fff; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:.98rem; cursor:pointer; min-width:130px;}
   .toolbtn.on{border-color:var(--acc); background:#EAFaf7;}
@@ -269,6 +277,7 @@
     <div id="paleta"></div>
     <div class="fila-btns">
       <button class="btn alt" id="btn-borrar-dibujo">🧽 Limpiar</button>
+      <button class="btn alt" id="btn-guardar-dibujo">💾 Guardar</button>
       <button class="btn" id="btn-cerrar-dibujo">Listo</button>
     </div>
   </div>
@@ -296,6 +305,93 @@
     <div class="fila-btns">
       <button class="btn alt" id="btn-chema-jugar">▶ ¡A jugar!</button>
       <button class="btn" id="btn-cerrar-chema">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="panel-vera" class="panelx hidden">
+  <div class="box">
+    <p><strong>📚 La letra escondida de Vera</strong></p>
+    <div id="vera-estrellas">⭐ 0</div>
+    <div id="vera-pregunta" class="pregunta-juego"></div>
+    <div id="vera-opciones"></div>
+    <p id="vera-feedback"></p>
+    <button class="btn" id="btn-cerrar-vera">Cerrar</button>
+  </div>
+</div>
+
+<div id="panel-lira" class="panelx hidden">
+  <div class="box">
+    <p><strong>🎵 Sigue el ritmo con Lira</strong><br>Escucha los sonidos y repítelos en el mismo orden.</p>
+    <div id="lira-estrellas">⭐ 0</div>
+    <div id="lira-pads">
+      <button class="lira-pad" data-n="0" style="background:#F6C6DA;">🔔</button>
+      <button class="lira-pad" data-n="1" style="background:#FDE9A8;">🥁</button>
+      <button class="lira-pad" data-n="2" style="background:#BEE3C0;">🎺</button>
+      <button class="lira-pad" data-n="3" style="background:#BFD9F2;">🎸</button>
+    </div>
+    <p id="lira-feedback">Toca «¡A jugar!» para empezar.</p>
+    <div class="fila-btns">
+      <button class="btn alt" id="btn-lira-jugar">▶ ¡A jugar!</button>
+      <button class="btn" id="btn-cerrar-lira">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="panel-ami" class="panelx hidden">
+  <div class="box">
+    <p><strong>💗 ¿Cómo se siente? — con Ami</strong></p>
+    <div id="ami-estrellas">⭐ 0</div>
+    <div id="ami-pregunta" class="pregunta-juego cara-grande"></div>
+    <div id="ami-opciones"></div>
+    <p id="ami-feedback"></p>
+    <button class="btn" id="btn-cerrar-ami">Cerrar</button>
+  </div>
+</div>
+
+<div id="panel-inti" class="panelx hidden">
+  <div class="box">
+    <p><strong>🪷 Respira con Inti</strong></p>
+    <div id="inti-circulo"></div>
+    <p id="inti-texto">Toca el botón para respirar conmigo.</p>
+    <p id="inti-cuenta">Respiraciones: 0</p>
+    <div class="fila-btns">
+      <button class="btn alt" id="btn-inti">▶ Empezar a respirar</button>
+      <button class="btn" id="btn-cerrar-inti">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="panel-nati" class="panelx hidden">
+  <div class="box">
+    <p><strong>🌿 ¿Quién soy? — adivinanzas de Nati</strong></p>
+    <div id="nati-estrellas">⭐ 0</div>
+    <div id="nati-pregunta" class="pregunta-juego"></div>
+    <div id="nati-opciones"></div>
+    <p id="nati-feedback"></p>
+    <button class="btn" id="btn-cerrar-nati">Cerrar</button>
+  </div>
+</div>
+
+<div id="panel-coni" class="panelx hidden">
+  <div class="box">
+    <p><strong>🕸️ Une la idea — con Coni</strong></p>
+    <div id="coni-estrellas">⭐ 0</div>
+    <div id="coni-pregunta" class="pregunta-juego"></div>
+    <div id="coni-opciones"></div>
+    <p id="coni-feedback"></p>
+    <button class="btn" id="btn-cerrar-coni">Cerrar</button>
+  </div>
+</div>
+
+<div id="panel-guardar" class="panelx hidden">
+  <div class="box">
+    <p><strong>🖼️ Tu dibujo</strong></p>
+    <img id="img-dibujo" alt="Tu dibujo" style="width:100%; border:2px solid var(--borde); border-radius:14px;">
+    <p>Mantén presionada la imagen para guardarla, o tómale una captura de pantalla.</p>
+    <div class="fila-btns">
+      <a class="btn alt" id="link-dibujo" download="mi-dibujo-cromi.png" href="#">⬇ Descargar</a>
+      <button class="btn" id="btn-cerrar-guardar">Cerrar</button>
     </div>
   </div>
 </div>
@@ -737,17 +833,21 @@ function cerrarPanel(id){ $(id).classList.add("hidden"); }
 function actualizarActividad(){
   var b = $("btn-actividad");
   if(!b) return;
-  var k = state.pers;
-  if(k === "cromi"){ b.textContent = "🎨 Pizarrón de Cromi"; b.classList.remove("hidden"); }
-  else if(k === "numi"){ b.textContent = "🔢 Juego de operaciones"; b.classList.remove("hidden"); }
-  else if(k === "brini"){ b.textContent = "🤸 Chema dice"; b.classList.remove("hidden"); }
-  else b.classList.add("hidden");
+  b.textContent = "✨ ¡Mi carisma!";
+  b.classList.remove("hidden");
 }
 $("btn-actividad").onclick = function(){
   stopSpeak();
-  if(state.pers === "cromi") abrirPanel("panel-dibujo");
-  else if(state.pers === "numi"){ nuevaOperacion(); abrirPanel("panel-numi"); }
-  else if(state.pers === "brini") abrirPanel("panel-chema");
+  var k = state.pers;
+  if(k === "cromi") abrirPanel("panel-dibujo");
+  else if(k === "numi"){ nuevaOperacion(); abrirPanel("panel-numi"); }
+  else if(k === "brini") abrirPanel("panel-chema");
+  else if(k === "vera"){ juegoVera.mostrar(); abrirPanel("panel-vera"); }
+  else if(k === "lira") abrirPanel("panel-lira");
+  else if(k === "ami"){ juegoAmi.mostrar(); abrirPanel("panel-ami"); }
+  else if(k === "inti") abrirPanel("panel-inti");
+  else if(k === "nati"){ juegoNati.mostrar(); abrirPanel("panel-nati"); }
+  else if(k === "coni"){ juegoConi.mostrar(); abrirPanel("panel-coni"); }
 };
 
 /* ---------- Pizarrón de Cromi ---------- */
@@ -871,6 +971,183 @@ function chemaResponder(id){
 }
 $("btn-chema-jugar").onclick = function(){ chemaNuevaOrden(); };
 $("btn-cerrar-chema").onclick = function(){ cerrarPanel("panel-chema"); };
+
+/* ---------- Guardar el dibujo de Cromi ---------- */
+$("btn-guardar-dibujo").onclick = function(){
+  var url = $("lienzo").toDataURL("image/png");
+  $("img-dibujo").src = url;
+  $("link-dibujo").href = url;
+  abrirPanel("panel-guardar");
+};
+$("btn-cerrar-guardar").onclick = function(){ cerrarPanel("panel-guardar"); };
+
+/* ---------- Motor simple de preguntas (Vera, Ami, Nati, Coni) ---------- */
+function quizJuego(prefijo, rondas){
+  var st = { i: 0, puntos: 0 };
+  function mostrar(){
+    var r = rondas[st.i % rondas.length];
+    $(prefijo + "-pregunta").textContent = r.q;
+    $(prefijo + "-feedback").textContent = "";
+    var cont = $(prefijo + "-opciones"); cont.innerHTML = "";
+    var orden = r.ops.map(function(o, idx){ return { t: o, buena: idx === r.ok }; });
+    orden.sort(function(){ return Math.random() - 0.5; });
+    orden.forEach(function(o){
+      var b = document.createElement("button");
+      b.className = "opbtn"; b.textContent = o.t;
+      b.onclick = function(){
+        if(o.buena){
+          st.puntos++;
+          $(prefijo + "-estrellas").textContent = "⭐ " + st.puntos;
+          $(prefijo + "-feedback").textContent = "¡Muy bien! 🎉";
+          st.i++;
+          setTimeout(mostrar, 900);
+        } else {
+          $(prefijo + "-feedback").textContent = "Casi… inténtalo otra vez. 💪";
+        }
+      };
+      cont.appendChild(b);
+    });
+  }
+  return { mostrar: mostrar };
+}
+var juegoVera = quizJuego("vera", [
+  { q: "¿Qué letra falta?  C _ S A", ops: ["A", "E", "O"], ok: 0 },
+  { q: "¿Qué letra falta?  L _ N A", ops: ["U", "A", "E"], ok: 0 },
+  { q: "¿Qué letra falta?  S _ L", ops: ["O", "A", "I"], ok: 0 },
+  { q: "¿Qué letra falta?  G _ T O", ops: ["A", "E", "U"], ok: 0 },
+  { q: "¿Qué letra falta?  L I B R _", ops: ["O", "A", "E"], ok: 0 },
+  { q: "¿Qué letra falta?  F L _ R", ops: ["O", "A", "U"], ok: 0 },
+  { q: "¿Qué letra falta?  P _ Z", ops: ["E", "A", "O"], ok: 0 },
+  { q: "¿Qué letra falta?  M E S _", ops: ["A", "O", "U"], ok: 0 }
+]);
+var juegoAmi = quizJuego("ami", [
+  { q: "😀", ops: ["Feliz", "Triste", "Enojado"], ok: 0 },
+  { q: "😢", ops: ["Triste", "Feliz", "Dormido"], ok: 0 },
+  { q: "😠", ops: ["Enojado", "Feliz", "Sorprendido"], ok: 0 },
+  { q: "😨", ops: ["Con miedo", "Feliz", "Triste"], ok: 0 },
+  { q: "😴", ops: ["Dormido", "Enojado", "Feliz"], ok: 0 },
+  { q: "🤩", ops: ["Emocionado", "Triste", "Con miedo"], ok: 0 }
+]);
+var juegoNati = quizJuego("nati", [
+  { q: "Tengo una trompa muy larga y orejas enormes. ¿Quién soy?", ops: ["🐘 Elefante", "🦒 Jirafa", "🐶 Perro"], ok: 0 },
+  { q: "Duermo colgado boca abajo y vuelo de noche. ¿Quién soy?", ops: ["🦇 Murciélago", "🦉 Búho", "🐝 Abeja"], ok: 0 },
+  { q: "Soy el rey de la selva y mi melena es enorme. ¿Quién soy?", ops: ["🦁 León", "🐯 Tigre", "🐴 Caballo"], ok: 0 },
+  { q: "Salto de rama en rama y me encantan las bananas. ¿Quién soy?", ops: ["🐒 Mono", "🐿️ Ardilla", "🦜 Loro"], ok: 0 },
+  { q: "Nado en el mar, salto las olas y soy muy listo. ¿Quién soy?", ops: ["🐬 Delfín", "🦈 Tiburón", "🐢 Tortuga"], ok: 0 },
+  { q: "Vivo en el corral, pongo huevos y digo clo-clo. ¿Quién soy?", ops: ["🐔 Gallina", "🦆 Pato", "🐷 Cerdito"], ok: 0 }
+]);
+var juegoConi = quizJuego("coni", [
+  { q: "☀️ El sol se conecta con…", ops: ["🌻 Un girasol", "🧦 Un calcetín", "🚗 Un coche"], ok: 0 },
+  { q: "🌧️ La lluvia se conecta con…", ops: ["☂️ Un paraguas", "🍕 Una pizza", "🛏️ Una cama"], ok: 0 },
+  { q: "🐝 La abeja se conecta con…", ops: ["🍯 La miel", "🐟 Un pez", "📱 Un teléfono"], ok: 0 },
+  { q: "📚 Un libro se conecta con…", ops: ["📖 Leer un cuento", "⚽ Jugar fútbol", "🍦 Un helado"], ok: 0 },
+  { q: "🌙 La noche se conecta con…", ops: ["⭐ Las estrellas", "🏖️ La playa", "🦁 Un león"], ok: 0 },
+  { q: "🔥 El fuego se conecta con…", ops: ["🚒 Los bomberos", "🐧 Un pingüino", "🎈 Un globo"], ok: 0 }
+]);
+$("btn-cerrar-vera").onclick = function(){ cerrarPanel("panel-vera"); };
+$("btn-cerrar-ami").onclick = function(){ cerrarPanel("panel-ami"); };
+$("btn-cerrar-nati").onclick = function(){ cerrarPanel("panel-nati"); };
+$("btn-cerrar-coni").onclick = function(){ cerrarPanel("panel-coni"); };
+
+/* ---------- Sigue el ritmo con Lira (memoria de sonidos) ---------- */
+var lira = { seq: [], paso: 0, turno: false, puntos: 0 };
+var LIRA_NOTAS = [262, 330, 392, 523];
+var liraCtx = null;
+function liraSonido(i){
+  try{
+    if(!liraCtx) liraCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(liraCtx.state === "suspended") liraCtx.resume();
+    var o = liraCtx.createOscillator(), g = liraCtx.createGain();
+    o.frequency.value = LIRA_NOTAS[i]; o.type = "sine"; g.gain.value = 0.22;
+    o.connect(g); g.connect(liraCtx.destination);
+    o.start(); o.stop(liraCtx.currentTime + 0.35);
+  }catch(e){}
+  var pads = document.querySelectorAll(".lira-pad");
+  if(pads[i]){ pads[i].classList.add("sel"); setTimeout(function(){ pads[i].classList.remove("sel"); }, 320); }
+}
+function liraTocarSecuencia(){
+  lira.turno = false;
+  $("lira-feedback").textContent = "Escucha con atención… 👂";
+  lira.seq.forEach(function(n, idx){
+    setTimeout(function(){ liraSonido(n); }, 600 * (idx + 1));
+  });
+  setTimeout(function(){
+    lira.paso = 0; lira.turno = true;
+    $("lira-feedback").textContent = "¡Tu turno! Repite los sonidos. 🎵";
+  }, 600 * (lira.seq.length + 1));
+}
+function liraNuevaRonda(){
+  lira.seq.push(Math.floor(Math.random() * 4));
+  liraTocarSecuencia();
+}
+$("btn-lira-jugar").onclick = function(){
+  lira.seq = []; lira.puntos = 0;
+  $("lira-estrellas").textContent = "⭐ 0";
+  liraNuevaRonda();
+};
+(function(){
+  var pads = document.querySelectorAll(".lira-pad");
+  for(var i = 0; i < pads.length; i++){
+    (function(n){
+      pads[n].onclick = function(){
+        liraSonido(n);
+        if(!lira.turno) return;
+        if(n === lira.seq[lira.paso]){
+          lira.paso++;
+          if(lira.paso >= lira.seq.length){
+            lira.turno = false;
+            lira.puntos++;
+            $("lira-estrellas").textContent = "⭐ " + lira.puntos;
+            $("lira-feedback").textContent = "¡Lo hiciste! 🎉 Una más larga…";
+            setTimeout(liraNuevaRonda, 1200);
+          }
+        } else {
+          lira.turno = false;
+          $("lira-feedback").textContent = "Casi… escucha otra vez. 💪";
+          setTimeout(liraTocarSecuencia, 1000);
+        }
+      };
+    })(i);
+  }
+})();
+$("btn-cerrar-lira").onclick = function(){ cerrarPanel("panel-lira"); };
+
+/* ---------- Respira con Inti ---------- */
+var inti = { activo: false, respiros: 0, timer: null };
+function intiCiclo(){
+  if(!inti.activo) return;
+  $("inti-texto").textContent = "Inhala… 🌸";
+  $("inti-circulo").classList.add("grande");
+  inti.timer = setTimeout(function(){
+    if(!inti.activo) return;
+    $("inti-texto").textContent = "Exhala… 🍃";
+    $("inti-circulo").classList.remove("grande");
+    inti.timer = setTimeout(function(){
+      if(!inti.activo) return;
+      inti.respiros++;
+      $("inti-cuenta").textContent = "Respiraciones: " + inti.respiros + (inti.respiros >= 3 ? " · ¡Qué calma! 🌈" : "");
+      intiCiclo();
+    }, 4200);
+  }, 4200);
+}
+$("btn-inti").onclick = function(){
+  var b = $("btn-inti");
+  if(inti.activo){
+    inti.activo = false;
+    clearTimeout(inti.timer);
+    $("inti-circulo").classList.remove("grande");
+    $("inti-texto").textContent = "Toca el botón para respirar conmigo.";
+    b.textContent = "▶ Empezar a respirar";
+  } else {
+    inti.activo = true;
+    b.textContent = "⏸ Parar";
+    intiCiclo();
+  }
+};
+$("btn-cerrar-inti").onclick = function(){
+  if(inti.activo) $("btn-inti").onclick();
+  cerrarPanel("panel-inti");
+};
 
 /* ================= VOZ: MICRÓFONO (DICTADO) =================
    Para los niños que están aprendiendo a escribir: tocan el micrófono,
