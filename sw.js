@@ -1,14 +1,14 @@
 /* Ju-bits Kids — service worker: la app se abre sin conexión tras la primera visita.
    Las llamadas a las API de IA (Groq/Gemini) siempre van a la red. */
-const CACHE = "jubits-kids-v16";
+const CACHE = "jubits-kids-v17";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./icon-192.png",
-  "./icon-512.png",
-  "./icon-maskable-512.png",
-  "./banner-sudadera.jpg",
+  "./icon-grupo-192.png",
+  "./icon-grupo-512.png",
+  "./icon-grupo-maskable-512.png",
+  "./banner-grupo.jpg",
   "./vera-sudadera.jpg",
   "./numi-sudadera.jpg",
   "./cromi-sudadera.jpg",
